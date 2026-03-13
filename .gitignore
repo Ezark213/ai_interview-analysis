@@ -1,0 +1,74 @@
+# API Keys and Secrets
+.env
+.env.local
+*.key
+*.pem
+credentials.json
+service-account.json
+
+# Google Apps Script
+.clasp.json
+.claspignore
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test data
+test-videos/
+sample-data/
+*.mp4
+*.mov
+*.avi
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# BigQuery
+*.json.bak
+
+# Reports (except templates)
+reports/*.pdf
+!reports/template.pdf
