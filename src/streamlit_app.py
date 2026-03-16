@@ -108,7 +108,14 @@ if uploaded_file is not None:
     # 一時保存ディレクトリ（絶対パスを使用）
     temp_dir = Path(__file__).parent.parent / "temp"
     temp_dir.mkdir(exist_ok=True)
-    temp_path = temp_dir / uploaded_file.name
+
+    # ファイル名を英数字のみに変更（Gemini API用）
+    # 元の拡張子を保持し、タイムスタンプで一意性を確保
+    import os as os_module
+    file_ext = os_module.path.splitext(uploaded_file.name)[1]  # 例: .mp4
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"uploaded_video_{timestamp}{file_ext}"
+    temp_path = temp_dir / safe_filename
 
     # ファイル保存
     with open(temp_path, "wb") as f:
