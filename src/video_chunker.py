@@ -143,7 +143,7 @@ class VideoChunker:
         Raises:
             RuntimeError: ffmpegの実行に失敗した場合
         """
-        print(f"Splitting video into {len(chunks)} chunks using ffmpeg...")
+        # Streamlit環境では print() が使えないため、ログ出力は行わない
 
         for chunk in chunks:
             # ffmpegコマンドを構築
@@ -166,7 +166,7 @@ class VideoChunker:
                     text=True,
                     check=True
                 )
-                print(f"Created chunk {chunk.chunk_id}: {chunk.video_path}")
+                # チャンク作成成功
                 self._created_files.append(chunk.video_path)
 
             except subprocess.CalledProcessError as e:
@@ -189,9 +189,10 @@ class VideoChunker:
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
-                    print(f"Deleted chunk file: {file_path}")
+                    # ファイル削除成功
             except Exception as e:
-                print(f"Warning: Failed to delete {file_path}: {e}")
+                # 削除失敗はエラーを発生させず、継続する
+                pass
 
         self._created_files.clear()
 
