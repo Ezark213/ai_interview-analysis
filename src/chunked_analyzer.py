@@ -186,9 +186,6 @@ class ChunkedVideoAnalyzer:
             log(f"[Chunk {chunk.chunk_id}] File exists: {os.path.exists(chunk.video_path)}")
 
             try:
-                import threading
-                upload_result = [None, None]  # [video_file, error]
-
                 log(f"[Chunk {chunk.chunk_id}] Initializing Gemini client...")
                 try:
                     client = self.client  # クライアント初期化を明示的に実行
@@ -197,54 +194,33 @@ class ChunkedVideoAnalyzer:
                     log(f"[Chunk {chunk.chunk_id}] Client initialization failed: {e}")
                     raise
 
-                def upload_file():
-                    try:
-                        # スレッド内では直接printを使用（Streamlitコールバックは使えない）
-                        print(f"[Chunk {chunk.chunk_id}] Starting upload in thread...", flush=True)
-                        vf = client.files.upload(file=chunk.video_path)
-                        upload_result[0] = vf
-                        print(f"[Chunk {chunk.chunk_id}] Upload completed in thread", flush=True)
-                    except Exception as e:
-                        print(f"[Chunk {chunk.chunk_id}] Upload failed in thread: {e}", flush=True)
-                        upload_result[1] = e
+                # スレッドを使わずに直接アップロード（シンプル化）
+                log(f"[Chunk {chunk.chunk_id}] Calling files.upload()...")
+                try:
+                    video_file = client.files.upload(file=chunk.video_path)
+                    log(f"[Chunk {chunk.chunk_id}] files.upload() returned")
 
-                log(f"[Chunk {chunk.chunk_id}] Creating upload thread...")
-                upload_thread = threading.Thread(target=upload_file)
-                upload_thread.daemon = True
-                log(f"[Chunk {chunk.chunk_id}] Starting upload thread, max wait: 120 seconds...")
-
-                import time
-                start_time = time.time()
-                upload_thread.start()
-
-                # 定期的にスレッドの状態をチェック
-                check_interval = 10  # 10秒ごと
-                elapsed = 0
-                while upload_thread.is_alive() and elapsed < 120:
-                    upload_thread.join(timeout=check_interval)
-                    elapsed = time.time() - start_time
-                    if upload_thread.is_alive():
-                        log(f"[Chunk {chunk.chunk_id}] Upload in progress... ({int(elapsed)}s elapsed)")
-
-                if upload_thread.is_alive():
-                    log(f"[Chunk {chunk.chunk_id}] Upload timeout after 120 seconds")
+                    if not video_file:
+                        return self._create_error_result(
+                            result,
+                            AnalysisError.ERR_FILE_UPLOAD_FAILED,
+                            "files.upload() returned None"
+                        )
+                except Exception as upload_error:
+                    log(f"[Chunk {chunk.chunk_id}] files.upload() raised exception: {upload_error}")
+                    error_msg = str(upload_error).lower()
+                    # APIキー関連エラー
+                    if "api key" in error_msg or "authentication" in error_msg or "unauthorized" in error_msg:
+                        return self._create_error_result(
+                            result,
+                            AnalysisError.ERR_API_KEY_INVALID,
+                            f"API authentication failed: {str(upload_error)}"
+                        )
+                    # 一般的なアップロードエラー
                     return self._create_error_result(
                         result,
                         AnalysisError.ERR_FILE_UPLOAD_FAILED,
-                        "File upload timeout after 120 seconds"
-                    )
-
-                log(f"[Chunk {chunk.chunk_id}] Upload thread completed")
-
-                if upload_result[1]:
-                    log(f"[Chunk {chunk.chunk_id}] Upload error occurred: {upload_result[1]}")
-                    raise upload_result[1]
-
-                if not upload_result[0]:
-                    return self._create_error_result(
-                        result,
-                        AnalysisError.ERR_FILE_UPLOAD_FAILED,
-                        "File upload returned None"
+                        f"File upload failed: {str(upload_error)}"
                     )
 
                 video_file = upload_result[0]

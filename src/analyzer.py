@@ -123,9 +123,6 @@ class VideoAnalyzer:
             log(f"File exists: {os.path.exists(video_path)}")
             log(f"File size: {os.path.getsize(video_path) / 1024 / 1024:.1f}MB")
 
-            import threading
-            upload_result = [None, None]  # [video_file, error]
-
             log("Initializing Gemini client...")
             try:
                 client = self.client  # クライアント初期化を明示的に実行
@@ -134,50 +131,10 @@ class VideoAnalyzer:
                 log(f"Client initialization failed: {e}")
                 raise
 
-            def upload_file():
-                try:
-                    # スレッド内では直接printを使用（Streamlitコールバックは使えない）
-                    print("Starting upload in thread...", flush=True)
-                    vf = client.files.upload(file=video_path)
-                    upload_result[0] = vf
-                    print("Upload completed in thread", flush=True)
-                except Exception as e:
-                    print(f"Upload failed in thread: {e}", flush=True)
-                    upload_result[1] = e
-
-            log("Creating upload thread...")
-            upload_thread = threading.Thread(target=upload_file)
-            upload_thread.daemon = True
-            log("Starting upload thread, max wait: 120 seconds...")
-
-            import time as time_module
-            start_time = time_module.time()
-            upload_thread.start()
-
-            # 定期的にスレッドの状態をチェック
-            check_interval = 10  # 10秒ごと
-            elapsed = 0
-            while upload_thread.is_alive() and elapsed < 120:
-                upload_thread.join(timeout=check_interval)
-                elapsed = time_module.time() - start_time
-                if upload_thread.is_alive():
-                    log(f"Upload in progress... ({int(elapsed)}s elapsed)")
-
-            if upload_thread.is_alive():
-                log("Upload timeout after 120 seconds")
-                raise Exception("File upload timeout after 120 seconds")
-
-            log("Upload thread completed")
-
-            if upload_result[1]:
-                log(f"Upload error: {upload_result[1]}")
-                raise upload_result[1]
-
-            if not upload_result[0]:
-                raise Exception("File upload returned None")
-
-            video_file = upload_result[0]
-            log(f"Upload successful (state: {video_file.state})")
+            # 直接アップロード（シンプル化）
+            log("Calling files.upload()...")
+            video_file = client.files.upload(file=video_path)
+            log(f"files.upload() returned, state: {video_file.state if video_file else 'None'}")
 
             # ファイルがACTIVE状態になるまで待機
             import time
