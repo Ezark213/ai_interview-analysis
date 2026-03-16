@@ -191,6 +191,16 @@ if uploaded_file is not None:
 
                             progress_bar.progress(80)
 
+                            # デバッグ: チャンク結果のステータスを確認
+                            log_callback("=== Chunk Results Summary ===")
+                            for i, cr in enumerate(chunk_results):
+                                status = cr.get("status", "unknown")
+                                error_code = cr.get("error_code", "N/A")
+                                has_eval = "evaluation" in cr
+                                log_callback(f"Chunk {i}: status={status}, error_code={error_code}, has_evaluation={has_eval}")
+                                if status == "error":
+                                    log_callback(f"  Error: {cr.get('error_message', 'No error message')}")
+
                             # 統合
                             status_text.text("結果を統合中...")
                             integrator = ChunkIntegrator()
