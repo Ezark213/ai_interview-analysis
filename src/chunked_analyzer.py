@@ -251,7 +251,7 @@ class ChunkedVideoAnalyzer:
                         f"File upload failed: {str(upload_error)}"
                     )
 
-                video_file = upload_result[0]
+                # アップロード成功後の処理
                 processing_info["file_uploaded"] = True
                 processing_info["file_state"] = video_file.state
                 log(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})")

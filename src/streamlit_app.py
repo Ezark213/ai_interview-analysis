@@ -178,27 +178,35 @@ if uploaded_file is not None:
                         # チャンク化
                         status_text.text(f"動画を{chunk_duration}分単位に分割中...")
                         chunker = VideoChunker(chunk_duration_seconds=chunk_duration * 60)
-                        chunks = chunker.create_chunks(str(temp_path), duration_seconds)
+                        chunks = chunker.create_chunks(str(temp_path), duration_seconds, split_physically=True)
 
                         progress_bar.progress(20)
 
                         # チャンク解析
                         status_text.text(f"{len(chunks)}個のチャンクを解析中...")
                         analyzer = ChunkedVideoAnalyzer(api_key=api_key, model=model, log_callback=log_callback)
-                        chunk_results = analyzer.analyze_chunks(chunks, parallel=use_parallel)
 
-                        progress_bar.progress(80)
+                        try:
+                            chunk_results = analyzer.analyze_chunks(chunks, parallel=use_parallel)
 
-                        # 統合
-                        status_text.text("結果を統合中...")
-                        integrator = ChunkIntegrator()
-                        result = integrator.integrate_chunks(chunk_results)
+                            progress_bar.progress(80)
 
-                        progress_bar.progress(100)
-                        status_text.text("✅ 解析完了!")
+                            # 統合
+                            status_text.text("結果を統合中...")
+                            integrator = ChunkIntegrator()
+                            result = integrator.integrate_chunks(chunk_results)
 
-                        # チャンク解析結果を保存（詳細表示用）
-                        st.session_state['chunk_results'] = chunk_results
+                            progress_bar.progress(100)
+                            status_text.text("✅ 解析完了!")
+
+                            # チャンク解析結果を保存（詳細表示用）
+                            st.session_state['chunk_results'] = chunk_results
+
+                        finally:
+                            # チャンク分割ファイルをクリーンアップ
+                            status_text.text("分割ファイルを削除中...")
+                            chunker.cleanup()
+                            st.info("分割された動画ファイルを削除しました")
 
                         # デバッグ: チャンク結果の詳細を表示
                         with st.expander("🔍 デバッグ: チャンク処理結果の詳細"):
