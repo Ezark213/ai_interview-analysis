@@ -18,9 +18,9 @@ except ImportError:
     print("Warning: google-genai not installed. Install with: pip install google-genai", file=sys.stderr)
 
 # 内部モジュール
-from knowledge_loader import load_knowledge_base
-from prompt_builder import build_prompt
-from response_parser import parse_response
+from .knowledge_loader import load_knowledge_base
+from .prompt_builder import build_prompt
+from .response_parser import parse_response
 
 
 class VideoAnalyzer:

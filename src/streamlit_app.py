@@ -123,9 +123,9 @@ if uploaded_file is not None:
                 try:
                     if use_chunk_analysis:
                         # チャンク解析を使用
-                        from video_chunker import VideoChunker, get_video_duration
-                        from chunked_analyzer import ChunkedVideoAnalyzer
-                        from chunk_integrator import ChunkIntegrator
+                        from src.video_chunker import VideoChunker, get_video_duration
+                        from src.chunked_analyzer import ChunkedVideoAnalyzer
+                        from src.chunk_integrator import ChunkIntegrator
 
                         # 進捗表示
                         progress_bar = st.progress(0)
@@ -170,7 +170,7 @@ if uploaded_file is not None:
 
                     else:
                         # 通常の解析を使用
-                        from analyzer import VideoAnalyzer
+                        from src.analyzer import VideoAnalyzer
 
                         # 解析実行
                         analyzer = VideoAnalyzer(api_key=api_key, model=model)

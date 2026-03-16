@@ -6,16 +6,11 @@ Iteration-07-file-state-fix: スコア0問題修正
 """
 
 import pytest
-import sys
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch
 
-# プロジェクトルートをパスに追加
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / "src"))
-
-from chunked_analyzer import ChunkedVideoAnalyzer
-from video_chunker import ChunkInfo
+from src.chunked_analyzer import ChunkedVideoAnalyzer
+from src.video_chunker import ChunkInfo
 
 
 class TestFileStateWaiting:

@@ -7,10 +7,10 @@ from typing import List, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 内部モジュール
-from video_chunker import ChunkInfo
-from knowledge_loader import load_knowledge_base
-from prompt_builder import build_prompt
-from response_parser import parse_response
+from .video_chunker import ChunkInfo
+from .knowledge_loader import load_knowledge_base
+from .prompt_builder import build_prompt
+from .response_parser import parse_response
 
 # Gemini SDK
 try:
@@ -90,70 +90,212 @@ class ChunkedVideoAnalyzer:
 
     def analyze_chunk(self, chunk: ChunkInfo) -> Dict[str, Any]:
         """
-        単一チャンクを解析
+        単一チャンクを解析（エラーハンドリング強化版）
 
         Args:
             chunk: チャンク情報
 
         Returns:
-            Dict[str, Any]: 評価結果（chunk_id, chunk_time_range付き）
-
-        Raises:
-            FileNotFoundError: ファイルが存在しない場合
-            Exception: APIエラー
-
-        仮定:
-            - 現時点では、動画全体をアップロードして解析
-            - チャンク単位の時間範囲指定は将来的に実装
-            - chunk.start_time, chunk.end_timeはメタデータとして付加のみ
+            Dict[str, Any]: 処理結果（status, error_code, 評価結果など）
+            {
+                "status": "success" or "error",
+                "error_code": "SUCCESS" or "ERR_XXX",
+                "error_message": "メッセージ",
+                "chunk_id": 0,
+                "chunk_time_range": {...},
+                "processing_info": {
+                    "file_uploaded": bool,
+                    "file_state": str,
+                    "content_generated": bool,
+                    "response_parsed": bool
+                },
+                "evaluation": {...}  # 成功時のみ
+            }
         """
-        # ナレッジベース読み込み
-        knowledge_text = load_knowledge_base()
-
-        # プロンプト構築
-        prompt_text = build_prompt(knowledge_text)
-
-        # Gemini API呼び出し
-        try:
-            # ファイルアップロード
-            video_file = self.client.files.upload(file=chunk.video_path)
-
-            # ファイルがACTIVE状態になるまで待機
-            print(f"[Chunk {chunk.chunk_id}] Waiting for file to be processed (state: {video_file.state})...", file=sys.stderr)
-            while video_file.state != "ACTIVE":
-                time.sleep(2)
-                video_file = self.client.files.get(name=video_file.name)
-                print(f"[Chunk {chunk.chunk_id}] File state: {video_file.state}", file=sys.stderr)
-                if video_file.state == "FAILED":
-                    raise Exception(f"File processing failed for chunk {chunk.chunk_id}: {video_file.name}")
-
-            print(f"[Chunk {chunk.chunk_id}] File is active. Generating content...", file=sys.stderr)
-
-            # コンテンツ生成
-            # TODO: 将来的には時間範囲パラメータを追加
-            # 仮定: 現時点では動画全体を解析（チャンク範囲は考慮しない）
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=[prompt_text, video_file]
-            )
-
-            response_text = response.text
-
-        except Exception as e:
-            # APIエラーをそのまま再送出
-            raise e
-
-        # レスポンスパース
-        result = parse_response(response_text)
-
-        # チャンク情報を付加
-        result["chunk_id"] = chunk.chunk_id
-        result["chunk_time_range"] = {
-            "start": chunk.start_time,
-            "end": chunk.end_time
+        # 処理状態を追跡
+        processing_info = {
+            "file_uploaded": False,
+            "file_state": "PENDING",
+            "content_generated": False,
+            "response_parsed": False
         }
 
-        return result
+        # 基本情報
+        result = {
+            "chunk_id": chunk.chunk_id,
+            "chunk_time_range": {
+                "start": chunk.start_time,
+                "end": chunk.end_time
+            },
+            "processing_info": processing_info
+        }
+
+        try:
+            # ステップ1: ファイル存在チェック
+            if not os.path.exists(chunk.video_path):
+                return self._create_error_result(
+                    result,
+                    AnalysisError.ERR_FILE_NOT_FOUND,
+                    f"Video file not found: {chunk.video_path}"
+                )
+
+            # ステップ2: ファイルサイズチェック（500MB制限）
+            file_size = os.path.getsize(chunk.video_path)
+            max_size = 500 * 1024 * 1024  # 500MB
+            if file_size > max_size:
+                return self._create_error_result(
+                    result,
+                    AnalysisError.ERR_FILE_TOO_LARGE,
+                    f"File size {file_size / 1024 / 1024:.1f}MB exceeds limit (500MB)"
+                )
+
+            print(f"[Chunk {chunk.chunk_id}] File OK: {file_size / 1024 / 1024:.1f}MB", file=sys.stderr)
+
+            # ステップ3: ナレッジベース読み込み
+            knowledge_text = load_knowledge_base()
+
+            # ステップ4: プロンプト構築
+            prompt_text = build_prompt(knowledge_text)
+
+            # ステップ5: ファイルアップロード
+            print(f"[Chunk {chunk.chunk_id}] Uploading file...", file=sys.stderr)
+            try:
+                video_file = self.client.files.upload(file=chunk.video_path)
+                processing_info["file_uploaded"] = True
+                processing_info["file_state"] = video_file.state
+                print(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})", file=sys.stderr)
+            except Exception as e:
+                error_msg = str(e).lower()
+                # APIキー関連エラー
+                if "api key" in error_msg or "authentication" in error_msg or "unauthorized" in error_msg:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_API_KEY_INVALID,
+                        f"API authentication failed: {str(e)}"
+                    )
+                # 一般的なアップロードエラー
+                return self._create_error_result(
+                    result,
+                    AnalysisError.ERR_FILE_UPLOAD_FAILED,
+                    f"File upload failed: {str(e)}"
+                )
+
+            # ステップ6: ファイルがACTIVE状態になるまで待機
+            print(f"[Chunk {chunk.chunk_id}] Waiting for file processing...", file=sys.stderr)
+            timeout_count = 0
+            max_timeout = 60  # 最大2分（2秒 × 60回）
+
+            while video_file.state != "ACTIVE":
+                if timeout_count >= max_timeout:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_FILE_PROCESSING_FAILED,
+                        f"File processing timeout (state: {video_file.state})"
+                    )
+
+                time.sleep(2)
+                timeout_count += 1
+                video_file = self.client.files.get(name=video_file.name)
+                processing_info["file_state"] = video_file.state
+
+                if video_file.state == "FAILED":
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_FILE_PROCESSING_FAILED,
+                        f"Gemini API file processing failed: {video_file.name}"
+                    )
+
+                if timeout_count % 5 == 0:  # 10秒ごとにログ出力
+                    print(f"[Chunk {chunk.chunk_id}] File state: {video_file.state} (waiting {timeout_count * 2}s)", file=sys.stderr)
+
+            print(f"[Chunk {chunk.chunk_id}] File is ACTIVE. Generating content...", file=sys.stderr)
+
+            # ステップ7: コンテンツ生成
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=[prompt_text, video_file]
+                )
+                processing_info["content_generated"] = True
+                response_text = response.text
+                print(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars", file=sys.stderr)
+            except Exception as e:
+                error_msg = str(e).lower()
+                # API制限エラー
+                if "quota" in error_msg or "limit exceeded" in error_msg:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_API_QUOTA_EXCEEDED,
+                        f"API quota exceeded: {str(e)}"
+                    )
+                if "rate limit" in error_msg:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_API_RATE_LIMIT,
+                        f"API rate limit exceeded: {str(e)}"
+                    )
+                # 一般的なコンテンツ生成エラー
+                return self._create_error_result(
+                    result,
+                    AnalysisError.ERR_GENERATE_CONTENT_FAILED,
+                    f"Content generation failed: {str(e)}"
+                )
+
+            # ステップ8: レスポンスパース
+            try:
+                evaluation = parse_response(response_text)
+                processing_info["response_parsed"] = True
+                print(f"[Chunk {chunk.chunk_id}] Response parsed successfully", file=sys.stderr)
+            except Exception as e:
+                return self._create_error_result(
+                    result,
+                    AnalysisError.ERR_RESPONSE_PARSE_FAILED,
+                    f"Response parsing failed: {str(e)}"
+                )
+
+            # 成功結果を返す
+            result["status"] = "success"
+            result["error_code"] = AnalysisError.SUCCESS
+            result["error_message"] = AnalysisError.MESSAGES[AnalysisError.SUCCESS]
+            result["evaluation"] = evaluation
+
+            print(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully", file=sys.stderr)
+            return result
+
+        except Exception as e:
+            # 予期しないエラー
+            return self._create_error_result(
+                result,
+                AnalysisError.ERR_UNKNOWN,
+                f"Unexpected error: {str(e)}"
+            )
+
+    def _create_error_result(
+        self,
+        base_result: Dict[str, Any],
+        error_code: str,
+        detail_message: str
+    ) -> Dict[str, Any]:
+        """
+        エラー結果を作成するヘルパーメソッド
+
+        Args:
+            base_result: ベース結果（chunk_id等を含む）
+            error_code: エラーコード
+            detail_message: 詳細メッセージ
+
+        Returns:
+            エラー結果辞書
+        """
+        base_result["status"] = "error"
+        base_result["error_code"] = error_code
+        base_result["error_message"] = AnalysisError.MESSAGES.get(error_code, "Unknown error")
+        base_result["error_detail"] = detail_message
+
+        chunk_id = base_result.get("chunk_id", "?")
+        print(f"[Chunk {chunk_id}] ✗ ERROR: {error_code} - {detail_message}", file=sys.stderr)
+
+        return base_result
 
     def analyze_chunks(
         self,
