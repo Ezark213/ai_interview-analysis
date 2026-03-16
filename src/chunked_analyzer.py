@@ -355,7 +355,15 @@ class ChunkedVideoAnalyzer:
             result["status"] = "success"
             result["error_code"] = AnalysisError.SUCCESS
             result["error_message"] = AnalysisError.MESSAGES[AnalysisError.SUCCESS]
-            result["evaluation"] = evaluation
+
+            # parse_responseの結果を展開してresultにマージ
+            result["overall_risk_score"] = evaluation.get("overall_risk_score", 0)
+            result["risk_level"] = evaluation.get("risk_level", "不明")
+            result["evaluation"] = evaluation.get("evaluation", {})
+            result["red_flags"] = evaluation.get("red_flags", [])
+            result["positive_signals"] = evaluation.get("positive_signals", [])
+            result["recommendation"] = evaluation.get("recommendation", "")
+            result["disclaimer"] = evaluation.get("disclaimer", "")
 
             log(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully")
             return result

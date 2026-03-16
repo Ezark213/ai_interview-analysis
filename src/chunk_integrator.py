@@ -37,26 +37,38 @@ class ChunkIntegrator:
             Dict[str, Any]: 統合された総合評価
 
         Raises:
-            ValueError: chunk_resultsが空の場合
+            ValueError: chunk_resultsが空の場合、または全チャンクがエラーの場合
         """
         if not chunk_results:
             raise ValueError("chunk_results cannot be empty")
 
+        # エラーステータスのチャンクをフィルタリング
+        successful_chunks = [
+            chunk for chunk in chunk_results
+            if chunk.get("status") != "error" and "evaluation" in chunk
+        ]
+
+        if not successful_chunks:
+            raise ValueError("All chunks failed with errors. Cannot generate overall evaluation.")
+
         # 単一チャンクの場合はそのまま返す（時間範囲情報は削除）
-        if len(chunk_results) == 1:
-            result = chunk_results[0].copy()
+        if len(successful_chunks) == 1:
+            result = successful_chunks[0].copy()
             result.pop("chunk_id", None)
             result.pop("chunk_time_range", None)
+            result.pop("status", None)
+            result.pop("error_code", None)
+            result.pop("processing_info", None)
             return result
 
         # 1. 一貫性チェック
-        consistency_issues = self._check_consistency(chunk_results)
+        consistency_issues = self._check_consistency(successful_chunks)
 
         # 2. 時系列パターン抽出
-        patterns = self._extract_patterns(chunk_results)
+        patterns = self._extract_patterns(successful_chunks)
 
         # 3. 総合評価生成
-        overall_evaluation = self._generate_overall_evaluation(chunk_results)
+        overall_evaluation = self._generate_overall_evaluation(successful_chunks)
 
         # 4. 統合結果を構築
         integrated_result = {
@@ -69,6 +81,8 @@ class ChunkIntegrator:
             "disclaimer": "本評価はAIによる参考情報です。最終判断は人間が行ってください。",
             "chunk_analysis": {
                 "num_chunks": len(chunk_results),
+                "num_successful": len(successful_chunks),
+                "num_failed": len(chunk_results) - len(successful_chunks),
                 "consistency_issues": consistency_issues,
                 "temporal_patterns": patterns
             }
