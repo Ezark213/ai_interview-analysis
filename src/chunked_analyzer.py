@@ -81,19 +81,31 @@ class ChunkedVideoAnalyzer:
         - 将来的には、File API + 時間範囲パラメータでの解析をサポート予定
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", log_callback=None):
+    def __init__(self, api_keys: List[str] = None, model: str = "gemini-2.5-flash", log_callback=None):
         """
-        初期化
+        初期化（複数APIキー対応）
 
         Args:
-            api_key: Gemini APIキー
+            api_keys: Gemini APIキーのリスト（自動フェイルオーバー用）
             model: 使用するモデル名
             log_callback: ログメッセージを受け取るコールバック関数（オプション）
         """
-        if not api_key:
-            raise ValueError("API key is required")
+        # 環境変数から複数のAPIキーを読み込み
+        if api_keys is None:
+            from dotenv import load_dotenv
+            load_dotenv()
+            api_keys = [
+                os.getenv("GEMINI_API_KEY_1"),
+                os.getenv("GEMINI_API_KEY_2")
+            ]
+            # Noneを除外
+            api_keys = [key for key in api_keys if key]
 
-        self.api_key = api_key
+        if not api_keys:
+            raise ValueError("At least one API key is required")
+
+        self.api_keys = api_keys
+        self.current_key_index = 0  # 現在使用中のキーのインデックス
         self.model = model
         self._client = None  # 遅延初期化
         self.log_callback = log_callback  # UIへのログ出力用
@@ -104,8 +116,17 @@ class ChunkedVideoAnalyzer:
         if self._client is None:
             if genai is None:
                 raise ImportError("google-genai package is not installed")
-            self._client = genai.Client(api_key=self.api_key)
+            current_key = self.api_keys[self.current_key_index]
+            self._client = genai.Client(api_key=current_key)
         return self._client
+
+    def switch_to_next_key(self):
+        """次のAPIキーに切り替える"""
+        if self.current_key_index < len(self.api_keys) - 1:
+            self.current_key_index += 1
+            self._client = None  # クライアントをリセット
+            return True
+        return False
 
     def analyze_chunk(self, chunk: ChunkInfo) -> Dict[str, Any]:
         """
@@ -434,8 +455,7 @@ class ChunkedVideoAnalyzer:
     def _analyze_chunks_sequential(self, chunks: List[ChunkInfo]) -> List[Dict[str, Any]]:
         """
         複数チャンクを順次解析
-        API制限対策として、各チャンク間に60秒の待機時間を設ける
-        (250k tokens/minの制限をリセットするため)
+        APIキーの自動切り替えによりレート制限を回避
 
         Args:
             chunks: チャンク情報のリスト
@@ -443,8 +463,6 @@ class ChunkedVideoAnalyzer:
         Returns:
             List[Dict[str, Any]]: 各チャンクの評価結果のリスト
         """
-        import time
-
         def log(msg):
             safe_print(msg, self.log_callback)
 
@@ -452,15 +470,16 @@ class ChunkedVideoAnalyzer:
         total = len(chunks)
 
         for i, chunk in enumerate(chunks):
-            log(f"Processing chunk {i+1}/{total}...")
+            log(f"Processing chunk {i+1}/{total} (using API key #{self.current_key_index + 1})...")
             result = self.analyze_chunk(chunk)
             results.append(result)
 
-            # API制限対策：次のチャンクまで待機（最後のチャンク以外）
-            if i < total - 1:
-                wait_time = 60  # 60秒待機（1分でレート制限をリセット）
-                log(f"Waiting {wait_time}s before next chunk to avoid API rate limit...")
-                time.sleep(wait_time)
+            # APIクォータエラーの場合、次のキーに切り替え
+            if result.get("error_code") == "ERR_006_API_QUOTA_EXCEEDED":
+                if self.switch_to_next_key():
+                    log(f"Switched to API key #{self.current_key_index + 1} due to quota limit")
+                else:
+                    log("All API keys exhausted. Cannot continue.")
 
         return results
 
