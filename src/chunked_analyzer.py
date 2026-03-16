@@ -189,15 +189,28 @@ class ChunkedVideoAnalyzer:
                 import threading
                 upload_result = [None, None]  # [video_file, error]
 
+                log(f"[Chunk {chunk.chunk_id}] Initializing Gemini client...")
+                try:
+                    client = self.client  # クライアント初期化を明示的に実行
+                    log(f"[Chunk {chunk.chunk_id}] Gemini client initialized")
+                except Exception as e:
+                    log(f"[Chunk {chunk.chunk_id}] Client initialization failed: {e}")
+                    raise
+
                 def upload_file():
                     try:
-                        vf = self.client.files.upload(file=chunk.video_path)
+                        log(f"[Chunk {chunk.chunk_id}] Starting upload in thread...")
+                        vf = client.files.upload(file=chunk.video_path)
                         upload_result[0] = vf
+                        log(f"[Chunk {chunk.chunk_id}] Upload completed in thread")
                     except Exception as e:
+                        log(f"[Chunk {chunk.chunk_id}] Upload failed in thread: {e}")
                         upload_result[1] = e
 
+                log(f"[Chunk {chunk.chunk_id}] Creating upload thread...")
                 upload_thread = threading.Thread(target=upload_file)
                 upload_thread.daemon = True
+                log(f"[Chunk {chunk.chunk_id}] Starting upload thread, max wait: 120 seconds...")
                 upload_thread.start()
                 upload_thread.join(timeout=120)  # 最大2分待機
 

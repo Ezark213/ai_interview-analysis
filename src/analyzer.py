@@ -126,13 +126,25 @@ class VideoAnalyzer:
             import threading
             upload_result = [None, None]  # [video_file, error]
 
+            log("Initializing Gemini client...")
+            try:
+                client = self.client  # クライアント初期化を明示的に実行
+                log("Gemini client initialized")
+            except Exception as e:
+                log(f"Client initialization failed: {e}")
+                raise
+
             def upload_file():
                 try:
-                    vf = self.client.files.upload(file=video_path)
+                    log("Starting upload in thread...")
+                    vf = client.files.upload(file=video_path)
                     upload_result[0] = vf
+                    log("Upload completed in thread")
                 except Exception as e:
+                    log(f"Upload failed in thread: {e}")
                     upload_result[1] = e
 
+            log("Creating upload thread...")
             upload_thread = threading.Thread(target=upload_file)
             upload_thread.daemon = True
             upload_thread.start()
