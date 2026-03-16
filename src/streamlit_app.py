@@ -74,8 +74,8 @@ with st.sidebar:
 
         use_parallel = st.checkbox(
             "並列処理を使用",
-            value=True,
-            help="複数チャンクを同時に解析して処理時間を短縮します"
+            value=False,
+            help="複数チャンクを同時に解析して処理時間を短縮します（ファイルアクセスエラーが発生する場合はOFFにしてください）"
         )
 
     st.divider()
