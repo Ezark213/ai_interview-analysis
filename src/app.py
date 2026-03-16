@@ -122,7 +122,14 @@ if uploaded_file is not None:
     with open(temp_path, "wb") as f:
         f.write(uploaded_file.read())
 
-    st.success(f"✅ ファイルをアップロードしました: {uploaded_file.name}")
+    # ファイルが正しく保存されたか確認
+    import time
+    time.sleep(0.5)  # ファイルシステムの同期を待つ
+    if not temp_path.exists():
+        st.error(f"❌ ファイル保存に失敗しました: {temp_path}")
+    else:
+        file_size_mb = temp_path.stat().st_size / 1024 / 1024
+        st.success(f"✅ ファイルをアップロードしました: {uploaded_file.name} ({file_size_mb:.1f}MB)")
 
     # 解析ボタン
     if st.button("🚀 解析開始", type="primary", use_container_width=True):

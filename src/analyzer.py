@@ -118,9 +118,40 @@ class VideoAnalyzer:
         # 5. Gemini API呼び出し
         try:
             # ファイルアップロード
-            # 仮定: `file` パラメータにファイルパスを渡す
             log(f"Uploading video file...")
-            video_file = self.client.files.upload(file=video_path)
+            log(f"File path: {video_path}")
+            log(f"File exists: {os.path.exists(video_path)}")
+            log(f"File size: {os.path.getsize(video_path) / 1024 / 1024:.1f}MB")
+
+            import threading
+            upload_result = [None, None]  # [video_file, error]
+
+            def upload_file():
+                try:
+                    vf = self.client.files.upload(file=video_path)
+                    upload_result[0] = vf
+                except Exception as e:
+                    upload_result[1] = e
+
+            upload_thread = threading.Thread(target=upload_file)
+            upload_thread.daemon = True
+            upload_thread.start()
+            log("Upload thread started, waiting max 120 seconds...")
+            upload_thread.join(timeout=120)
+
+            if upload_thread.is_alive():
+                log("Upload timeout after 120 seconds")
+                raise Exception("File upload timeout after 120 seconds")
+
+            if upload_result[1]:
+                log(f"Upload error: {upload_result[1]}")
+                raise upload_result[1]
+
+            if not upload_result[0]:
+                raise Exception("File upload returned None")
+
+            video_file = upload_result[0]
+            log(f"Upload successful (state: {video_file.state})")
 
             # ファイルがACTIVE状態になるまで待機
             import time

@@ -182,8 +182,44 @@ class ChunkedVideoAnalyzer:
 
             # ステップ5: ファイルアップロード
             log(f"[Chunk {chunk.chunk_id}] Uploading file...")
+            log(f"[Chunk {chunk.chunk_id}] File path: {chunk.video_path}")
+            log(f"[Chunk {chunk.chunk_id}] File exists: {os.path.exists(chunk.video_path)}")
+
             try:
-                video_file = self.client.files.upload(file=chunk.video_path)
+                import threading
+                upload_result = [None, None]  # [video_file, error]
+
+                def upload_file():
+                    try:
+                        vf = self.client.files.upload(file=chunk.video_path)
+                        upload_result[0] = vf
+                    except Exception as e:
+                        upload_result[1] = e
+
+                upload_thread = threading.Thread(target=upload_file)
+                upload_thread.daemon = True
+                upload_thread.start()
+                upload_thread.join(timeout=120)  # 最大2分待機
+
+                if upload_thread.is_alive():
+                    log(f"[Chunk {chunk.chunk_id}] Upload timeout after 120 seconds")
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_FILE_UPLOAD_FAILED,
+                        "File upload timeout after 120 seconds"
+                    )
+
+                if upload_result[1]:
+                    raise upload_result[1]
+
+                if not upload_result[0]:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_FILE_UPLOAD_FAILED,
+                        "File upload returned None"
+                    )
+
+                video_file = upload_result[0]
                 processing_info["file_uploaded"] = True
                 processing_info["file_state"] = video_file.state
                 log(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})")
