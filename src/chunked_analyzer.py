@@ -229,6 +229,9 @@ class ChunkedVideoAnalyzer:
                 processing_info["content_generated"] = True
                 response_text = response.text
                 safe_print(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars")
+
+                # デバッグ: レスポンステキストの先頭500文字を出力
+                safe_print(f"[Chunk {chunk.chunk_id}] Response preview: {response_text[:500]}")
             except Exception as e:
                 error_msg = str(e).lower()
                 # API制限エラー
@@ -256,6 +259,10 @@ class ChunkedVideoAnalyzer:
                 evaluation = parse_response(response_text)
                 processing_info["response_parsed"] = True
                 safe_print(f"[Chunk {chunk.chunk_id}] Response parsed successfully")
+
+                # デバッグ: パース結果のスコアを出力
+                overall_score = evaluation.get("overall_risk_score", "N/A")
+                safe_print(f"[Chunk {chunk.chunk_id}] Parsed overall_risk_score: {overall_score}")
             except Exception as e:
                 return self._create_error_result(
                     result,

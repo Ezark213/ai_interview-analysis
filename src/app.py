@@ -173,6 +173,12 @@ if uploaded_file is not None:
                         # チャンク解析結果を保存（詳細表示用）
                         st.session_state['chunk_results'] = chunk_results
 
+                        # デバッグ: チャンク結果の詳細を表示
+                        with st.expander("🔍 デバッグ: チャンク処理結果の詳細"):
+                            for idx, chunk_res in enumerate(chunk_results):
+                                st.subheader(f"Chunk {idx} 処理結果")
+                                st.json(chunk_res)
+
                     else:
                         # 通常の解析を使用
                         from src.analyzer import VideoAnalyzer
