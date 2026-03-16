@@ -190,15 +190,43 @@ class ChunkedVideoAnalyzer:
                 try:
                     client = self.client  # クライアント初期化を明示的に実行
                     log(f"[Chunk {chunk.chunk_id}] Gemini client initialized")
+
+                    # APIが応答するかテスト
+                    log(f"[Chunk {chunk.chunk_id}] Testing API connection by listing models...")
+                    try:
+                        models = client.models.list()
+                        log(f"[Chunk {chunk.chunk_id}] API connection OK, found {len(list(models))} models")
+                    except Exception as api_test_error:
+                        log(f"[Chunk {chunk.chunk_id}] API test failed: {api_test_error}")
+                        return self._create_error_result(
+                            result,
+                            AnalysisError.ERR_API_KEY_INVALID,
+                            f"API connection failed: {str(api_test_error)}"
+                        )
                 except Exception as e:
                     log(f"[Chunk {chunk.chunk_id}] Client initialization failed: {e}")
                     raise
 
-                # スレッドを使わずに直接アップロード（シンプル化）
-                log(f"[Chunk {chunk.chunk_id}] Calling files.upload()...")
+                # ファイルを開いて確認
+                log(f"[Chunk {chunk.chunk_id}] Opening file for verification...")
+                try:
+                    with open(chunk.video_path, 'rb') as f:
+                        first_bytes = f.read(100)
+                        log(f"[Chunk {chunk.chunk_id}] File readable, first 10 bytes: {first_bytes[:10]}")
+                except Exception as file_error:
+                    return self._create_error_result(
+                        result,
+                        AnalysisError.ERR_FILE_NOT_FOUND,
+                        f"Cannot read file: {str(file_error)}"
+                    )
+
+                # 直接アップロード（タイムアウトなし、詳細ログ付き）
+                log(f"[Chunk {chunk.chunk_id}] Calling client.files.upload()...")
+                log(f"[Chunk {chunk.chunk_id}] This may take several minutes for 118MB file...")
+
                 try:
                     video_file = client.files.upload(file=chunk.video_path)
-                    log(f"[Chunk {chunk.chunk_id}] files.upload() returned")
+                    log(f"[Chunk {chunk.chunk_id}] files.upload() returned successfully")
 
                     if not video_file:
                         return self._create_error_result(
@@ -206,17 +234,17 @@ class ChunkedVideoAnalyzer:
                             AnalysisError.ERR_FILE_UPLOAD_FAILED,
                             "files.upload() returned None"
                         )
+
+                    log(f"[Chunk {chunk.chunk_id}] File name: {video_file.name}, State: {video_file.state}")
                 except Exception as upload_error:
                     log(f"[Chunk {chunk.chunk_id}] files.upload() raised exception: {upload_error}")
                     error_msg = str(upload_error).lower()
-                    # APIキー関連エラー
                     if "api key" in error_msg or "authentication" in error_msg or "unauthorized" in error_msg:
                         return self._create_error_result(
                             result,
                             AnalysisError.ERR_API_KEY_INVALID,
                             f"API authentication failed: {str(upload_error)}"
                         )
-                    # 一般的なアップロードエラー
                     return self._create_error_result(
                         result,
                         AnalysisError.ERR_FILE_UPLOAD_FAILED,

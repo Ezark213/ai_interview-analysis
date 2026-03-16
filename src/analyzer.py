@@ -131,10 +131,21 @@ class VideoAnalyzer:
                 log(f"Client initialization failed: {e}")
                 raise
 
-            # 直接アップロード（シンプル化）
-            log("Calling files.upload()...")
+            # ファイルを開いて確認
+            log("Opening file for verification...")
+            try:
+                with open(video_path, 'rb') as f:
+                    first_bytes = f.read(100)
+                    log(f"File readable, first 10 bytes: {first_bytes[:10]}")
+            except Exception as file_error:
+                raise FileNotFoundError(f"Cannot read file: {str(file_error)}")
+
+            # 直接アップロード（詳細ログ付き）
+            log("Calling client.files.upload()...")
+            log("This may take several minutes for large files...")
+
             video_file = client.files.upload(file=video_path)
-            log(f"files.upload() returned, state: {video_file.state if video_file else 'None'}")
+            log(f"files.upload() returned successfully, state: {video_file.state if video_file else 'None'}")
 
             # ファイルがACTIVE状態になるまで待機
             import time
