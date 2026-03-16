@@ -17,9 +17,14 @@ if sys.platform == 'win32':
         # Streamlit環境などで既にstdoutが管理されている場合はスキップ
         pass
 
+# プロジェクトルートをPythonパスに追加（srcモジュールのインポート用）
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 import streamlit as st
 import os
-from pathlib import Path
 import json
 from datetime import datetime
 
