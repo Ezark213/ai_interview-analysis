@@ -199,20 +199,32 @@ class ChunkedVideoAnalyzer:
 
                 def upload_file():
                     try:
-                        log(f"[Chunk {chunk.chunk_id}] Starting upload in thread...")
+                        # スレッド内では直接printを使用（Streamlitコールバックは使えない）
+                        print(f"[Chunk {chunk.chunk_id}] Starting upload in thread...", flush=True)
                         vf = client.files.upload(file=chunk.video_path)
                         upload_result[0] = vf
-                        log(f"[Chunk {chunk.chunk_id}] Upload completed in thread")
+                        print(f"[Chunk {chunk.chunk_id}] Upload completed in thread", flush=True)
                     except Exception as e:
-                        log(f"[Chunk {chunk.chunk_id}] Upload failed in thread: {e}")
+                        print(f"[Chunk {chunk.chunk_id}] Upload failed in thread: {e}", flush=True)
                         upload_result[1] = e
 
                 log(f"[Chunk {chunk.chunk_id}] Creating upload thread...")
                 upload_thread = threading.Thread(target=upload_file)
                 upload_thread.daemon = True
                 log(f"[Chunk {chunk.chunk_id}] Starting upload thread, max wait: 120 seconds...")
+
+                import time
+                start_time = time.time()
                 upload_thread.start()
-                upload_thread.join(timeout=120)  # 最大2分待機
+
+                # 定期的にスレッドの状態をチェック
+                check_interval = 10  # 10秒ごと
+                elapsed = 0
+                while upload_thread.is_alive() and elapsed < 120:
+                    upload_thread.join(timeout=check_interval)
+                    elapsed = time.time() - start_time
+                    if upload_thread.is_alive():
+                        log(f"[Chunk {chunk.chunk_id}] Upload in progress... ({int(elapsed)}s elapsed)")
 
                 if upload_thread.is_alive():
                     log(f"[Chunk {chunk.chunk_id}] Upload timeout after 120 seconds")
@@ -222,7 +234,10 @@ class ChunkedVideoAnalyzer:
                         "File upload timeout after 120 seconds"
                     )
 
+                log(f"[Chunk {chunk.chunk_id}] Upload thread completed")
+
                 if upload_result[1]:
+                    log(f"[Chunk {chunk.chunk_id}] Upload error occurred: {upload_result[1]}")
                     raise upload_result[1]
 
                 if not upload_result[0]:

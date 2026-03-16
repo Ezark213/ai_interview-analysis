@@ -136,24 +136,38 @@ class VideoAnalyzer:
 
             def upload_file():
                 try:
-                    log("Starting upload in thread...")
+                    # スレッド内では直接printを使用（Streamlitコールバックは使えない）
+                    print("Starting upload in thread...", flush=True)
                     vf = client.files.upload(file=video_path)
                     upload_result[0] = vf
-                    log("Upload completed in thread")
+                    print("Upload completed in thread", flush=True)
                 except Exception as e:
-                    log(f"Upload failed in thread: {e}")
+                    print(f"Upload failed in thread: {e}", flush=True)
                     upload_result[1] = e
 
             log("Creating upload thread...")
             upload_thread = threading.Thread(target=upload_file)
             upload_thread.daemon = True
+            log("Starting upload thread, max wait: 120 seconds...")
+
+            import time as time_module
+            start_time = time_module.time()
             upload_thread.start()
-            log("Upload thread started, waiting max 120 seconds...")
-            upload_thread.join(timeout=120)
+
+            # 定期的にスレッドの状態をチェック
+            check_interval = 10  # 10秒ごと
+            elapsed = 0
+            while upload_thread.is_alive() and elapsed < 120:
+                upload_thread.join(timeout=check_interval)
+                elapsed = time_module.time() - start_time
+                if upload_thread.is_alive():
+                    log(f"Upload in progress... ({int(elapsed)}s elapsed)")
 
             if upload_thread.is_alive():
                 log("Upload timeout after 120 seconds")
                 raise Exception("File upload timeout after 120 seconds")
+
+            log("Upload thread completed")
 
             if upload_result[1]:
                 log(f"Upload error: {upload_result[1]}")
