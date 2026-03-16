@@ -434,6 +434,7 @@ class ChunkedVideoAnalyzer:
     def _analyze_chunks_sequential(self, chunks: List[ChunkInfo]) -> List[Dict[str, Any]]:
         """
         複数チャンクを順次解析
+        API制限対策として、各チャンク間に30秒の待機時間を設ける
 
         Args:
             chunks: チャンク情報のリスト
@@ -441,10 +442,24 @@ class ChunkedVideoAnalyzer:
         Returns:
             List[Dict[str, Any]]: 各チャンクの評価結果のリスト
         """
+        import time
+
+        def log(msg):
+            safe_print(msg, self.log_callback)
+
         results = []
-        for chunk in chunks:
+        total = len(chunks)
+
+        for i, chunk in enumerate(chunks):
+            log(f"Processing chunk {i+1}/{total}...")
             result = self.analyze_chunk(chunk)
             results.append(result)
+
+            # API制限対策：次のチャンクまで待機（最後のチャンク以外）
+            if i < total - 1:
+                wait_time = 30  # 30秒待機
+                log(f"Waiting {wait_time}s before next chunk to avoid API rate limit...")
+                time.sleep(wait_time)
 
         return results
 
