@@ -15,12 +15,29 @@ try:
     from google import genai
 except ImportError:
     genai = None
-    print("Warning: google-genai not installed. Install with: pip install google-genai")
+    try:
+        print("Warning: google-genai not installed. Install with: pip install google-genai")
+    except:
+        pass
 
 # 内部モジュール
 from .knowledge_loader import load_knowledge_base
 from .prompt_builder import build_prompt
 from .response_parser import parse_response
+
+
+# Streamlit環境でのprint安全化
+def safe_print(msg, log_callback=None):
+    """Streamlit環境でもエラーにならないprint関数"""
+    try:
+        print(msg)
+    except (ValueError, OSError):
+        pass
+    if log_callback:
+        try:
+            log_callback(msg)
+        except:
+            pass
 
 
 class VideoAnalyzer:
@@ -36,13 +53,14 @@ class VideoAnalyzer:
 
     SUPPORTED_FORMATS = [".mp4", ".mov", ".avi", ".webm"]
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", log_callback=None):
         """
         初期化
 
         Args:
             api_key: Gemini APIキー
             model: 使用するモデル名（デフォルト: gemini-2.5-flash）
+            log_callback: ログメッセージを受け取るコールバック関数（オプション）
         """
         if not api_key:
             raise ValueError("API key is required")
@@ -50,6 +68,7 @@ class VideoAnalyzer:
         self.api_key = api_key
         self.model = model
         self._client = None  # 遅延初期化
+        self.log_callback = log_callback
 
     @property
     def client(self):
@@ -74,6 +93,10 @@ class VideoAnalyzer:
             FileNotFoundError: ファイルが存在しない場合
             ValueError: サポート外の拡張子の場合
         """
+        # ログ出力用ヘルパー関数
+        def log(msg):
+            safe_print(msg, self.log_callback)
+
         # 1. ファイル存在チェック
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
@@ -96,20 +119,20 @@ class VideoAnalyzer:
         try:
             # ファイルアップロード
             # 仮定: `file` パラメータにファイルパスを渡す
-            print(f"Uploading video file...")
+            log(f"Uploading video file...")
             video_file = self.client.files.upload(file=video_path)
 
             # ファイルがACTIVE状態になるまで待機
             import time
-            print(f"Waiting for file to be processed (state: {video_file.state})...")
+            log(f"Waiting for file to be processed (state: {video_file.state})...")
             while video_file.state != "ACTIVE":
                 time.sleep(2)
                 video_file = self.client.files.get(name=video_file.name)
-                print(f"File state: {video_file.state}")
+                log(f"File state: {video_file.state}")
                 if video_file.state == "FAILED":
                     raise Exception(f"File processing failed: {video_file.name}")
 
-            print(f"File is active. Generating content...")
+            log(f"File is active. Generating content...")
 
             # コンテンツ生成
             # 仮定: contents引数にプロンプトとファイルを渡す
@@ -173,7 +196,7 @@ def main():
 
     # 解析実行
     try:
-        print(f"Analyzing video: {args.video_path}")
+        log(f"Analyzing video: {args.video_path}")
         result = analyzer.analyze(args.video_path)
 
         # 結果をJSON形式で出力

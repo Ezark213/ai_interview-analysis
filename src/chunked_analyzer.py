@@ -20,13 +20,20 @@ except ImportError:
 
 
 # Streamlit環境でのprint安全化
-def safe_print(msg):
+def safe_print(msg, log_callback=None):
     """Streamlit環境でもエラーにならないprint関数"""
     try:
         print(msg)
     except (ValueError, OSError):
         # stdout/stderrがクローズされている場合は無視
         pass
+
+    # ログコールバックがあれば呼び出し
+    if log_callback:
+        try:
+            log_callback(msg)
+        except:
+            pass
 
 
 # エラーコード定義
@@ -74,13 +81,14 @@ class ChunkedVideoAnalyzer:
         - 将来的には、File API + 時間範囲パラメータでの解析をサポート予定
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-2.5-flash", log_callback=None):
         """
         初期化
 
         Args:
             api_key: Gemini APIキー
             model: 使用するモデル名
+            log_callback: ログメッセージを受け取るコールバック関数（オプション）
         """
         if not api_key:
             raise ValueError("API key is required")
@@ -88,6 +96,7 @@ class ChunkedVideoAnalyzer:
         self.api_key = api_key
         self.model = model
         self._client = None  # 遅延初期化
+        self.log_callback = log_callback  # UIへのログ出力用
 
     @property
     def client(self):
@@ -130,6 +139,10 @@ class ChunkedVideoAnalyzer:
             "response_parsed": False
         }
 
+        # ログ出力用ヘルパー関数
+        def log(msg):
+            safe_print(msg, self.log_callback)
+
         # 基本情報
         result = {
             "chunk_id": chunk.chunk_id,
@@ -159,7 +172,7 @@ class ChunkedVideoAnalyzer:
                     f"File size {file_size / 1024 / 1024:.1f}MB exceeds limit (500MB)"
                 )
 
-            safe_print(f"[Chunk {chunk.chunk_id}] File OK: {file_size / 1024 / 1024:.1f}MB")
+            log(f"[Chunk {chunk.chunk_id}] File OK: {file_size / 1024 / 1024:.1f}MB")
 
             # ステップ3: ナレッジベース読み込み
             knowledge_text = load_knowledge_base()
@@ -168,12 +181,12 @@ class ChunkedVideoAnalyzer:
             prompt_text = build_prompt(knowledge_text)
 
             # ステップ5: ファイルアップロード
-            safe_print(f"[Chunk {chunk.chunk_id}] Uploading file...")
+            log(f"[Chunk {chunk.chunk_id}] Uploading file...")
             try:
                 video_file = self.client.files.upload(file=chunk.video_path)
                 processing_info["file_uploaded"] = True
                 processing_info["file_state"] = video_file.state
-                safe_print(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})")
+                log(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})")
             except Exception as e:
                 error_msg = str(e).lower()
                 # APIキー関連エラー
@@ -191,7 +204,7 @@ class ChunkedVideoAnalyzer:
                 )
 
             # ステップ6: ファイルがACTIVE状態になるまで待機
-            safe_print(f"[Chunk {chunk.chunk_id}] Waiting for file processing...")
+            log(f"[Chunk {chunk.chunk_id}] Waiting for file processing...")
             timeout_count = 0
             max_timeout = 60  # 最大2分（2秒 × 60回）
 
@@ -216,9 +229,9 @@ class ChunkedVideoAnalyzer:
                     )
 
                 if timeout_count % 5 == 0:  # 10秒ごとにログ出力
-                    safe_print(f"[Chunk {chunk.chunk_id}] File state: {video_file.state} (waiting {timeout_count * 2}s)")
+                    log(f"[Chunk {chunk.chunk_id}] File state: {video_file.state} (waiting {timeout_count * 2}s)")
 
-            safe_print(f"[Chunk {chunk.chunk_id}] File is ACTIVE. Generating content...")
+            log(f"[Chunk {chunk.chunk_id}] File is ACTIVE. Generating content...")
 
             # ステップ7: コンテンツ生成
             try:
@@ -228,10 +241,10 @@ class ChunkedVideoAnalyzer:
                 )
                 processing_info["content_generated"] = True
                 response_text = response.text
-                safe_print(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars")
+                log(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars")
 
                 # デバッグ: レスポンステキストの先頭500文字を出力
-                safe_print(f"[Chunk {chunk.chunk_id}] Response preview: {response_text[:500]}")
+                log(f"[Chunk {chunk.chunk_id}] Response preview: {response_text[:500]}")
             except Exception as e:
                 error_msg = str(e).lower()
                 # API制限エラー
@@ -258,11 +271,11 @@ class ChunkedVideoAnalyzer:
             try:
                 evaluation = parse_response(response_text)
                 processing_info["response_parsed"] = True
-                safe_print(f"[Chunk {chunk.chunk_id}] Response parsed successfully")
+                log(f"[Chunk {chunk.chunk_id}] Response parsed successfully")
 
                 # デバッグ: パース結果のスコアを出力
                 overall_score = evaluation.get("overall_risk_score", "N/A")
-                safe_print(f"[Chunk {chunk.chunk_id}] Parsed overall_risk_score: {overall_score}")
+                log(f"[Chunk {chunk.chunk_id}] Parsed overall_risk_score: {overall_score}")
             except Exception as e:
                 return self._create_error_result(
                     result,
@@ -276,7 +289,7 @@ class ChunkedVideoAnalyzer:
             result["error_message"] = AnalysisError.MESSAGES[AnalysisError.SUCCESS]
             result["evaluation"] = evaluation
 
-            safe_print(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully")
+            log(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully")
             return result
 
         except Exception as e:

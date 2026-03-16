@@ -111,6 +111,7 @@ if uploaded_file is not None:
 
     # ファイル名を英数字のみに変更（Gemini API用）
     # 元の拡張子を保持し、タイムスタンプで一意性を確保
+    from datetime import datetime
     import os as os_module
     file_ext = os_module.path.splitext(uploaded_file.name)[1]  # 例: .mp4
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -132,6 +133,18 @@ if uploaded_file is not None:
             use_chunk_analysis = use_chunking and uploaded_file.size > 50 * 1024 * 1024  # 50MB以上
 
             with st.spinner("動画を解析中... これには数分かかることがあります"):
+                # リアルタイムログ表示エリア
+                log_container = st.expander("📝 処理ログ（リアルタイム）", expanded=True)
+                log_text = log_container.empty()
+                log_messages = []
+
+                def log_callback(msg):
+                    """ログメッセージをUIに表示"""
+                    log_messages.append(msg)
+                    # 最新50行のみ表示
+                    display_logs = log_messages[-50:]
+                    log_text.text("\n".join(display_logs))
+
                 try:
                     if use_chunk_analysis:
                         # チャンク解析を使用
@@ -164,7 +177,7 @@ if uploaded_file is not None:
 
                         # チャンク解析
                         status_text.text(f"{len(chunks)}個のチャンクを解析中...")
-                        analyzer = ChunkedVideoAnalyzer(api_key=api_key, model=model)
+                        analyzer = ChunkedVideoAnalyzer(api_key=api_key, model=model, log_callback=log_callback)
                         chunk_results = analyzer.analyze_chunks(chunks, parallel=use_parallel)
 
                         progress_bar.progress(80)
@@ -191,7 +204,7 @@ if uploaded_file is not None:
                         from src.analyzer import VideoAnalyzer
 
                         # 解析実行
-                        analyzer = VideoAnalyzer(api_key=api_key, model=model)
+                        analyzer = VideoAnalyzer(api_key=api_key, model=model, log_callback=log_callback)
                         result = analyzer.analyze(str(temp_path))
 
                     # 成功メッセージ
