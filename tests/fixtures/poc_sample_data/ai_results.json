@@ -1,0 +1,220 @@
+[
+  {
+    "candidate_id": "C001",
+    "candidate_name": "候補者A（優秀）",
+    "overall_risk_score": 85,
+    "risk_level": "低",
+    "evaluation": {
+      "communication": {
+        "score": 90,
+        "observations": [
+          "明瞭で論理的な発話（参照: 言語表現評価基準）",
+          "適切なアイコンタクトを維持（参照: 非言語コミュニケーション基準）"
+        ],
+        "confidence": "高"
+      },
+      "stress_tolerance": {
+        "score": 80,
+        "observations": [
+          "難しい質問にも落ち着いて対応（参照: ストレス耐性評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "reliability": {
+        "score": 85,
+        "observations": [
+          "具体的なエピソードを交えて説明（参照: 信頼性評価基準）",
+          "一貫した回答内容（参照: 誠実性評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "teamwork": {
+        "score": 85,
+        "observations": [
+          "チーム経験を具体的に語る（参照: 協調性評価基準）"
+        ],
+        "confidence": "高"
+      }
+    },
+    "red_flags": [],
+    "positive_signals": [
+      "技術的な質問に具体的かつ正確に回答",
+      "プロジェクト経験が豊富"
+    ],
+    "recommendation": "技術力・コミュニケーション力共に優秀。即採用を推奨。",
+    "hallucination_warnings": []
+  },
+  {
+    "candidate_id": "C002",
+    "candidate_name": "候補者B（優秀）",
+    "overall_risk_score": 78,
+    "risk_level": "低",
+    "evaluation": {
+      "communication": {
+        "score": 80,
+        "observations": [
+          "明瞭な発話（参照: 言語表現評価基準）",
+          "やや緊張しているが適切に対応（参照: 非言語コミュニケーション基準）"
+        ],
+        "confidence": "高"
+      },
+      "stress_tolerance": {
+        "score": 75,
+        "observations": [
+          "プレッシャー下でも冷静に対応（参照: ストレス耐性評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "reliability": {
+        "score": 78,
+        "observations": [
+          "エピソードの詳細を語る（参照: 信頼性評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "teamwork": {
+        "score": 80,
+        "observations": [
+          "チーム経験を前向きに語る（参照: 協調性評価基準）"
+        ],
+        "confidence": "高"
+      }
+    },
+    "red_flags": [],
+    "positive_signals": [
+      "学習意欲が高い"
+    ],
+    "recommendation": "技術力は十分。採用を推奨。",
+    "hallucination_warnings": []
+  },
+  {
+    "candidate_id": "C003",
+    "candidate_name": "候補者C（問題あり）",
+    "overall_risk_score": 45,
+    "risk_level": "高",
+    "evaluation": {
+      "communication": {
+        "score": 40,
+        "observations": [
+          "視線が不安定で回避的（参照: 非言語コミュニケーション基準）",
+          "発話が不明瞭（参照: 言語表現評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "stress_tolerance": {
+        "score": 35,
+        "observations": [
+          "難しい質問で動揺が目立つ（参照: ストレス耐性評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "reliability": {
+        "score": 50,
+        "observations": [
+          "エピソードの矛盾が散見される（参照: 信頼性評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "teamwork": {
+        "score": 55,
+        "observations": [
+          "他者への批判的発言が目立つ（参照: 協調性評価基準）"
+        ],
+        "confidence": "高"
+      }
+    },
+    "red_flags": [
+      "前職での人間関係トラブルの示唆",
+      "技術的質問への回答が曖昧"
+    ],
+    "positive_signals": [],
+    "recommendation": "リスクが高い。追加面談または見送りを推奨。",
+    "hallucination_warnings": []
+  },
+  {
+    "candidate_id": "C004",
+    "candidate_name": "候補者D（問題あり）",
+    "overall_risk_score": 50,
+    "risk_level": "中",
+    "evaluation": {
+      "communication": {
+        "score": 55,
+        "observations": [
+          "やや曖昧な表現が多い（参照: 言語表現評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "stress_tolerance": {
+        "score": 45,
+        "observations": [
+          "プレッシャー下で不安定（参照: ストレス耐性評価基準）"
+        ],
+        "confidence": "高"
+      },
+      "reliability": {
+        "score": 50,
+        "observations": [
+          "具体的なエピソードが少ない（参照: 信頼性評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "teamwork": {
+        "score": 50,
+        "observations": [
+          "チーム経験の言及が限定的（参照: 協調性評価基準）"
+        ],
+        "confidence": "中"
+      }
+    },
+    "red_flags": [
+      "職歴の空白期間について説明が不明瞭"
+    ],
+    "positive_signals": [],
+    "recommendation": "慎重な判断が必要。追加面談を推奨。",
+    "hallucination_warnings": []
+  },
+  {
+    "candidate_id": "C005",
+    "candidate_name": "候補者E（判断困難）",
+    "overall_risk_score": 65,
+    "risk_level": "中",
+    "evaluation": {
+      "communication": {
+        "score": 70,
+        "observations": [
+          "概ね明瞭な発話（参照: 言語表現評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "stress_tolerance": {
+        "score": 60,
+        "observations": [
+          "プレッシャー下での行動が不明（参照: ストレス耐性評価基準）"
+        ],
+        "confidence": "低"
+      },
+      "reliability": {
+        "score": 65,
+        "observations": [
+          "エピソードはあるが詳細が不足（参照: 信頼性評価基準）"
+        ],
+        "confidence": "中"
+      },
+      "teamwork": {
+        "score": 65,
+        "observations": [
+          "チーム経験について語る（参照: 協調性評価基準）"
+        ],
+        "confidence": "中"
+      }
+    },
+    "red_flags": [],
+    "positive_signals": [
+      "技術的な基礎知識はある"
+    ],
+    "recommendation": "標準的な候補者。追加情報があれば判断を推奨。",
+    "hallucination_warnings": [
+      "確信度が低い評価が1カテゴリ存在"
+    ]
+  }
+]

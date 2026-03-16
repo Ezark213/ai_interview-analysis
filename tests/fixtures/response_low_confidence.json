@@ -1,0 +1,38 @@
+{
+  "overall_risk_score": 50,
+  "risk_level": "中",
+  "evaluation": {
+    "communication": {
+      "score": 55,
+      "observations": [
+        "やや視線が不安定（参照: 非言語コミュニケーション基準）"
+      ],
+      "confidence": "低"
+    },
+    "stress_tolerance": {
+      "score": 45,
+      "observations": [
+        "プレッシャー下での行動が不明（参照: ストレス耐性評価基準）"
+      ],
+      "confidence": "低"
+    },
+    "reliability": {
+      "score": 50,
+      "observations": [
+        "エピソードの詳細が少ない（参照: 信頼性評価基準）"
+      ],
+      "confidence": "低"
+    },
+    "teamwork": {
+      "score": 55,
+      "observations": [
+        "チーム経験の言及が限定的（参照: 協調性評価基準）"
+      ],
+      "confidence": "低"
+    }
+  },
+  "red_flags": [],
+  "positive_signals": [],
+  "recommendation": "動画の情報が不十分なため、追加面談を推奨。",
+  "disclaimer": "本評価はAIによる参考情報です。最終判断は人間が行ってください。"
+}

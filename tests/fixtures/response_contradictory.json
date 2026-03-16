@@ -1,0 +1,40 @@
+{
+  "overall_risk_score": 85,
+  "risk_level": "低",
+  "evaluation": {
+    "communication": {
+      "score": 90,
+      "observations": [
+        "視線が不安定で回避的（参照: 非言語コミュニケーション基準）",
+        "発話が不明瞭で聞き取りにくい（参照: 言語表現評価基準）"
+      ],
+      "confidence": "低"
+    },
+    "stress_tolerance": {
+      "score": 85,
+      "observations": [
+        "質問に対して落ち着いて回答（参照: ストレス耐性評価基準）"
+      ],
+      "confidence": "高"
+    },
+    "reliability": {
+      "score": 80,
+      "observations": [
+        "エピソードの矛盾が多い（参照: 信頼性評価基準）",
+        "詳細を避ける傾向（参照: 誠実性評価基準）"
+      ],
+      "confidence": "中"
+    },
+    "teamwork": {
+      "score": 85,
+      "observations": [
+        "他者への批判的発言が目立つ（参照: 協調性評価基準）"
+      ],
+      "confidence": "高"
+    }
+  },
+  "red_flags": [],
+  "positive_signals": ["高いコミュニケーション能力"],
+  "recommendation": "非常に優秀な候補者。即採用を推奨。",
+  "disclaimer": "本評価はAIによる参考情報です。最終判断は人間が行ってください。"
+}

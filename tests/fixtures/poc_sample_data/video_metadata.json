@@ -1,0 +1,52 @@
+[
+  {
+    "candidate_id": "C001",
+    "video_file": "interview_C001.mp4",
+    "duration_seconds": 1800,
+    "recording_date": "2026-01-15",
+    "interviewer": "面接官X",
+    "video_quality": "高",
+    "audio_quality": "高",
+    "notes": "通常の面談動画"
+  },
+  {
+    "candidate_id": "C002",
+    "video_file": "interview_C002.mp4",
+    "duration_seconds": 1650,
+    "recording_date": "2026-01-18",
+    "interviewer": "面接官Y",
+    "video_quality": "高",
+    "audio_quality": "高",
+    "notes": "通常の面談動画"
+  },
+  {
+    "candidate_id": "C003",
+    "video_file": "interview_C003.mp4",
+    "duration_seconds": 1200,
+    "recording_date": "2026-01-20",
+    "interviewer": "面接官X",
+    "video_quality": "中",
+    "audio_quality": "中",
+    "notes": "候補者が早めに面談を切り上げた"
+  },
+  {
+    "candidate_id": "C004",
+    "video_file": "interview_C004.mp4",
+    "duration_seconds": 1750,
+    "recording_date": "2026-01-22",
+    "interviewer": "面接官Z",
+    "video_quality": "高",
+    "audio_quality": "高",
+    "notes": "通常の面談動画"
+  },
+  {
+    "candidate_id": "C005",
+    "video_file": "interview_C005.mp4",
+    "duration_seconds": 1500,
+    "recording_date": "2026-01-25",
+    "interviewer": "面接官Y",
+    "video_quality": "中",
+    "audio_quality": "中",
+    "notes": "音声の一部に雑音あり"
+  }
+]
