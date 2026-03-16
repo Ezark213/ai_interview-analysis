@@ -149,7 +149,7 @@ class ChunkedVideoAnalyzer:
                     f"File size {file_size / 1024 / 1024:.1f}MB exceeds limit (500MB)"
                 )
 
-            print(f"[Chunk {chunk.chunk_id}] File OK: {file_size / 1024 / 1024:.1f}MB", file=sys.stderr)
+            print(f"[Chunk {chunk.chunk_id}] File OK: {file_size / 1024 / 1024:.1f}MB")
 
             # ステップ3: ナレッジベース読み込み
             knowledge_text = load_knowledge_base()
@@ -158,12 +158,12 @@ class ChunkedVideoAnalyzer:
             prompt_text = build_prompt(knowledge_text)
 
             # ステップ5: ファイルアップロード
-            print(f"[Chunk {chunk.chunk_id}] Uploading file...", file=sys.stderr)
+            print(f"[Chunk {chunk.chunk_id}] Uploading file...")
             try:
                 video_file = self.client.files.upload(file=chunk.video_path)
                 processing_info["file_uploaded"] = True
                 processing_info["file_state"] = video_file.state
-                print(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})", file=sys.stderr)
+                print(f"[Chunk {chunk.chunk_id}] Upload successful (state: {video_file.state})")
             except Exception as e:
                 error_msg = str(e).lower()
                 # APIキー関連エラー
@@ -181,7 +181,7 @@ class ChunkedVideoAnalyzer:
                 )
 
             # ステップ6: ファイルがACTIVE状態になるまで待機
-            print(f"[Chunk {chunk.chunk_id}] Waiting for file processing...", file=sys.stderr)
+            print(f"[Chunk {chunk.chunk_id}] Waiting for file processing...")
             timeout_count = 0
             max_timeout = 60  # 最大2分（2秒 × 60回）
 
@@ -206,9 +206,9 @@ class ChunkedVideoAnalyzer:
                     )
 
                 if timeout_count % 5 == 0:  # 10秒ごとにログ出力
-                    print(f"[Chunk {chunk.chunk_id}] File state: {video_file.state} (waiting {timeout_count * 2}s)", file=sys.stderr)
+                    print(f"[Chunk {chunk.chunk_id}] File state: {video_file.state} (waiting {timeout_count * 2}s)")
 
-            print(f"[Chunk {chunk.chunk_id}] File is ACTIVE. Generating content...", file=sys.stderr)
+            print(f"[Chunk {chunk.chunk_id}] File is ACTIVE. Generating content...")
 
             # ステップ7: コンテンツ生成
             try:
@@ -218,7 +218,7 @@ class ChunkedVideoAnalyzer:
                 )
                 processing_info["content_generated"] = True
                 response_text = response.text
-                print(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars", file=sys.stderr)
+                print(f"[Chunk {chunk.chunk_id}] Content generated: {len(response_text)} chars")
             except Exception as e:
                 error_msg = str(e).lower()
                 # API制限エラー
@@ -245,7 +245,7 @@ class ChunkedVideoAnalyzer:
             try:
                 evaluation = parse_response(response_text)
                 processing_info["response_parsed"] = True
-                print(f"[Chunk {chunk.chunk_id}] Response parsed successfully", file=sys.stderr)
+                print(f"[Chunk {chunk.chunk_id}] Response parsed successfully")
             except Exception as e:
                 return self._create_error_result(
                     result,
@@ -259,7 +259,7 @@ class ChunkedVideoAnalyzer:
             result["error_message"] = AnalysisError.MESSAGES[AnalysisError.SUCCESS]
             result["evaluation"] = evaluation
 
-            print(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully", file=sys.stderr)
+            print(f"[Chunk {chunk.chunk_id}] ✓ Analysis completed successfully")
             return result
 
         except Exception as e:
@@ -293,7 +293,7 @@ class ChunkedVideoAnalyzer:
         base_result["error_detail"] = detail_message
 
         chunk_id = base_result.get("chunk_id", "?")
-        print(f"[Chunk {chunk_id}] ✗ ERROR: {error_code} - {detail_message}", file=sys.stderr)
+        print(f"[Chunk {chunk_id}] ✗ ERROR: {error_code} - {detail_message}")
 
         return base_result
 

@@ -15,7 +15,7 @@ try:
     from google import genai
 except ImportError:
     genai = None
-    print("Warning: google-genai not installed. Install with: pip install google-genai", file=sys.stderr)
+    print("Warning: google-genai not installed. Install with: pip install google-genai")
 
 # 内部モジュール
 from .knowledge_loader import load_knowledge_base
@@ -96,20 +96,20 @@ class VideoAnalyzer:
         try:
             # ファイルアップロード
             # 仮定: `file` パラメータにファイルパスを渡す
-            print(f"Uploading video file...", file=sys.stderr)
+            print(f"Uploading video file...")
             video_file = self.client.files.upload(file=video_path)
 
             # ファイルがACTIVE状態になるまで待機
             import time
-            print(f"Waiting for file to be processed (state: {video_file.state})...", file=sys.stderr)
+            print(f"Waiting for file to be processed (state: {video_file.state})...")
             while video_file.state != "ACTIVE":
                 time.sleep(2)
                 video_file = self.client.files.get(name=video_file.name)
-                print(f"File state: {video_file.state}", file=sys.stderr)
+                print(f"File state: {video_file.state}")
                 if video_file.state == "FAILED":
                     raise Exception(f"File processing failed: {video_file.name}")
 
-            print(f"File is active. Generating content...", file=sys.stderr)
+            print(f"File is active. Generating content...")
 
             # コンテンツ生成
             # 仮定: contents引数にプロンプトとファイルを渡す
@@ -160,33 +160,33 @@ def main():
     # APIキー取得
     api_key = args.api_key or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        print("Error: GEMINI_API_KEY not set. Use --api-key or set GEMINI_API_KEY in .env", file=sys.stderr)
+        print("Error: GEMINI_API_KEY not set. Use --api-key or set GEMINI_API_KEY in .env")
         sys.exit(1)
 
     # アナライザー初期化
     try:
         analyzer = VideoAnalyzer(api_key=api_key, model=args.model)
     except ImportError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        print("Install dependencies: pip install -r requirements.txt", file=sys.stderr)
+        print(f"Error: {e}")
+        print("Install dependencies: pip install -r requirements.txt")
         sys.exit(1)
 
     # 解析実行
     try:
-        print(f"Analyzing video: {args.video_path}", file=sys.stderr)
+        print(f"Analyzing video: {args.video_path}")
         result = analyzer.analyze(args.video_path)
 
         # 結果をJSON形式で出力
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     except FileNotFoundError as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error: {e}")
         sys.exit(1)
     except ValueError as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"Error: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+        print(f"Unexpected error: {e}")
         sys.exit(1)
 
 
