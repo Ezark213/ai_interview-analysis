@@ -1,9 +1,67 @@
 """動画チャンク化モジュール"""
+import math
 import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
+
+
+def calculate_chunk_strategy(duration_seconds: int) -> dict:
+    """
+    動画の長さに応じたチャンク分割戦略を決定する
+
+    Args:
+        duration_seconds: 動画の長さ（秒）
+
+    Returns:
+        dict: {
+            "should_chunk": bool,        # 分割するかどうか
+            "num_chunks": int,            # チャンク数（1=分割なし）
+            "chunk_duration_seconds": int  # 各チャンクの長さ（秒）
+        }
+
+    ルール:
+        - 15分以下（<=900秒）: 分割しない → num_chunks=1
+        - 15分超〜30分以下（901〜1800秒）: 2分割
+        - 30分超〜60分以下（1801〜3600秒）: 3分割
+        - 60分超〜90分以下（3601〜5400秒）: 4分割
+        - 90分超（5401秒〜）: 5分割
+
+    Raises:
+        ValueError: duration_secondsが0以下の場合
+    """
+    if duration_seconds <= 0:
+        raise ValueError(f"duration_seconds must be positive, got {duration_seconds}")
+
+    if duration_seconds <= 900:
+        # 15分以下: 分割しない
+        num_chunks = 1
+        should_chunk = False
+    elif duration_seconds <= 1800:
+        # 15分超〜30分以下: 2分割
+        num_chunks = 2
+        should_chunk = True
+    elif duration_seconds <= 3600:
+        # 30分超〜60分以下: 3分割
+        num_chunks = 3
+        should_chunk = True
+    elif duration_seconds <= 5400:
+        # 60分超〜90分以下: 4分割
+        num_chunks = 4
+        should_chunk = True
+    else:
+        # 90分超: 5分割
+        num_chunks = 5
+        should_chunk = True
+
+    chunk_duration = math.ceil(duration_seconds / num_chunks) if num_chunks > 1 else duration_seconds
+
+    return {
+        "should_chunk": should_chunk,
+        "num_chunks": num_chunks,
+        "chunk_duration_seconds": chunk_duration,
+    }
 
 
 @dataclass
@@ -180,6 +238,24 @@ class VideoChunker:
                     "  Mac: brew install ffmpeg\n"
                     "  Linux: sudo apt-get install ffmpeg"
                 )
+
+    def create_chunks_by_count(self, video_path: str, video_duration_seconds: int,
+                               num_chunks: int, split_physically: bool = True) -> List[ChunkInfo]:
+        """
+        チャンク数を指定して均等分割
+
+        Args:
+            video_path: 動画ファイルのパス
+            video_duration_seconds: 動画の長さ（秒）
+            num_chunks: 分割数
+            split_physically: 物理的に動画を分割するか（デフォルト: True）
+
+        Returns:
+            List[ChunkInfo]: チャンク情報のリスト
+        """
+        chunk_duration = math.ceil(video_duration_seconds / num_chunks)
+        self.chunk_duration = chunk_duration
+        return self.create_chunks(video_path, video_duration_seconds, split_physically)
 
     def cleanup(self):
         """

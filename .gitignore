@@ -5,6 +5,7 @@
 *.pem
 credentials.json
 service-account.json
+.streamlit/secrets.toml
 
 # Google Apps Script
 .clasp.json
