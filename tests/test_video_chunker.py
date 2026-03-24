@@ -37,8 +37,8 @@ class TestVideoChunker:
         """正常系: 30分動画を5分単位で6チャンクに分割"""
         video_path, duration = mock_video_30min
 
-        # 実行（durationを渡す - 実際の実装では動画から自動取得）
-        chunks = chunker.create_chunks(video_path, duration)
+        # 実行（durationを渡す - ダミーファイルのためffmpeg分割はスキップ）
+        chunks = chunker.create_chunks(video_path, duration, split_physically=False)
 
         # 検証
         assert len(chunks) == 6
@@ -53,8 +53,8 @@ class TestVideoChunker:
         """境界値: 動画長が5分未満の場合（1チャンクのみ）"""
         video_path, duration = mock_video_4min
 
-        # 実行
-        chunks = chunker.create_chunks(video_path, duration)
+        # 実行（ダミーファイルのためffmpeg分割はスキップ）
+        chunks = chunker.create_chunks(video_path, duration, split_physically=False)
 
         # 検証
         assert len(chunks) == 1
@@ -68,8 +68,8 @@ class TestVideoChunker:
         video_path.write_bytes(b"dummy 5min video")
         duration = 300  # 5分 = 300秒
 
-        # 実行
-        chunks = chunker.create_chunks(str(video_path), duration)
+        # 実行（ダミーファイルのためffmpeg分割はスキップ）
+        chunks = chunker.create_chunks(str(video_path), duration, split_physically=False)
 
         # 検証
         assert len(chunks) == 1
@@ -83,8 +83,8 @@ class TestVideoChunker:
         video_path.write_bytes(b"dummy 32min video")
         duration = 1920  # 32分 = 1920秒
 
-        # 実行
-        chunks = chunker.create_chunks(str(video_path), duration)
+        # 実行（ダミーファイルのためffmpeg分割はスキップ）
+        chunks = chunker.create_chunks(str(video_path), duration, split_physically=False)
 
         # 検証: 6チャンク（5分×6） + 1チャンク（2分）= 7チャンク
         assert len(chunks) == 7

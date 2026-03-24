@@ -41,19 +41,19 @@ def test_env_file_exists():
 
 
 def test_gemini_api_key_in_env():
-    """GEMINI_API_KEYが.envに設定されているかチェック"""
+    """GEMINI_API_KEY_1が.envに設定されているかチェック"""
     from dotenv import load_dotenv
 
     # .envファイルを読み込む
     env_path = Path(__file__).parent.parent / ".env"
     load_dotenv(env_path)
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY_1")
     assert api_key is not None, (
-        "GEMINI_API_KEY not set in .env file. "
-        "Please add GEMINI_API_KEY=your_api_key_here to .env"
+        "GEMINI_API_KEY_1 not set in .env file. "
+        "Please add GEMINI_API_KEY_1=your_api_key_here to .env"
     )
-    assert len(api_key) > 0, "GEMINI_API_KEY is empty"
+    assert len(api_key) > 0, "GEMINI_API_KEY_1 is empty"
 
 
 def test_api_key_format():
@@ -64,17 +64,17 @@ def test_api_key_format():
     env_path = Path(__file__).parent.parent / ".env"
     load_dotenv(env_path)
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GEMINI_API_KEY_1")
 
     # 基本的なフォーマットチェック
-    assert api_key is not None, "GEMINI_API_KEY not set"
+    assert api_key is not None, "GEMINI_API_KEY_1 not set"
     assert len(api_key) >= 20, (
-        f"GEMINI_API_KEY too short (length: {len(api_key)}). "
+        f"GEMINI_API_KEY_1 too short (length: {len(api_key)}). "
         "Expected at least 20 characters. "
         "Please verify your API key from https://aistudio.google.com/apikey"
     )
-    assert api_key != "your_api_key_here", (
-        "GEMINI_API_KEY is still the placeholder value. "
+    assert api_key != "your_gemini_api_key_here", (
+        "GEMINI_API_KEY_1 is still the placeholder value. "
         "Please replace it with your actual API key from "
         "https://aistudio.google.com/apikey"
     )

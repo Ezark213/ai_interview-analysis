@@ -146,6 +146,46 @@ class TestBehavioralMetrics:
         assert len(warnings) > 0
         assert any("eye_contact_quality" in w for w in warnings)
 
+    def test_validate_behavioral_metrics_none(self):
+        """behavioral_metricsがNoneの場合のバリデーション（IT-11追加）"""
+        from src.response_parser import validate_behavioral_metrics
+
+        # Noneを渡しても例外を投げず、空リストを返すこと
+        warnings = validate_behavioral_metrics(None)
+        assert isinstance(warnings, list)
+        assert len(warnings) == 0
+
+    def test_merge_behavioral_metrics_no_valid_chunks(self):
+        """有効チャンクが0件の場合のメトリクスマージ（IT-11追加）"""
+        integrator = ChunkIntegrator()
+
+        # behavioral_metricsがNoneのチャンクのみ
+        chunk_results = [
+            {
+                "chunk_id": 0,
+                "chunk_time_range": {"start": 0, "end": 300},
+                "status": "success",
+                "overall_risk_score": 75,
+                "risk_level": "低",
+                "evaluation": {
+                    "communication": {"score": 80, "observations": ["テスト（参照: 基準）"], "confidence": "高"},
+                    "stress_tolerance": {"score": 70, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
+                    "reliability": {"score": 75, "observations": ["テスト（参照: 基準）"], "confidence": "高"},
+                    "teamwork": {"score": 72, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
+                },
+                "behavioral_metrics": None,
+                "red_flags": [],
+                "positive_signals": ["テスト"],
+                "recommendation": "テスト",
+                "disclaimer": "テスト",
+            },
+        ]
+
+        result = integrator.integrate_chunks(chunk_results)
+
+        # 単一チャンクの場合はそのまま返されるが、metricsはNoneのまま
+        assert result.get("behavioral_metrics") is None
+
     def test_chunk_integrator_merges_metrics(self):
         """チャンク統合時にメトリクスが正しくマージされる"""
         integrator = ChunkIntegrator()
