@@ -37,10 +37,13 @@ ai_interview-analysis/
 ```toml
 GEMINI_API_KEY_1 = "あなたのAPIキー1"
 GEMINI_API_KEY_2 = "あなたのAPIキー2"
+OPENAI_API_KEY = "あなたのOpenAI APIキー"
 ```
 
 - APIキー2はオプション（自動フェイルオーバー用）
 - APIキーは[Google AI Studio](https://aistudio.google.com/app/apikey)で取得
+- OPENAI_API_KEYはオプション（Whisper文字起こし機能用、$0.006/分）
+- OpenAI APIキーは[OpenAI Platform](https://platform.openai.com/api-keys)で取得
 
 ### 4. デプロイ実行
 
@@ -84,6 +87,7 @@ Streamlit Cloudの無料枠ではアップロード上限が200MB。動画サイ
 ```toml
 GEMINI_API_KEY_1 = "あなたのAPIキー1"
 GEMINI_API_KEY_2 = "あなたのAPIキー2"
+OPENAI_API_KEY = "あなたのOpenAI APIキー"
 ```
 
 このファイルは`.gitignore`に含まれているため、GitHubにはプッシュされません。

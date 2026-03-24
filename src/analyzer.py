@@ -79,12 +79,13 @@ class VideoAnalyzer:
             self._client = genai.Client(api_key=self.api_key)
         return self._client
 
-    def analyze(self, video_path: str) -> Dict[str, Any]:
+    def analyze(self, video_path: str, transcript: str = None) -> Dict[str, Any]:
         """
         動画を解析し、評価結果を返す
 
         Args:
             video_path: 動画ファイルのパス
+            transcript: 文字起こしテキスト（オプション。Whisper使用時に渡す）
 
         Returns:
             Dict[str, Any]: 評価結果（JSON形式）
@@ -113,7 +114,7 @@ class VideoAnalyzer:
         knowledge_text = load_knowledge_base()
 
         # 4. プロンプト構築
-        prompt_text = build_prompt(knowledge_text)
+        prompt_text = build_prompt(knowledge_text, transcript=transcript)
 
         # 5. Gemini API呼び出し
         try:

@@ -18,6 +18,8 @@
 ## ナレッジベース
 {knowledge_base}
 
+{transcript_section}
+
 ## 出力形式
 以下のJSON形式で出力してください:
 

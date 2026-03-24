@@ -9,7 +9,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 
-def load_api_keys() -> tuple[str, str]:
+def load_api_keys() -> tuple[str, str, str]:
     """
     APIキーを読み込む（ローカル.env優先、なければStreamlit Secrets）
 
@@ -18,12 +18,13 @@ def load_api_keys() -> tuple[str, str]:
         2. Streamlit Secrets（クラウド環境）
 
     Returns:
-        tuple: (api_key_1, api_key_2)
+        tuple: (gemini_key_1, gemini_key_2, openai_key)
     """
     # 1. まず.envから読み込み
     load_dotenv()
     key1 = os.getenv("GEMINI_API_KEY_1", "")
     key2 = os.getenv("GEMINI_API_KEY_2", "")
+    openai_key = os.getenv("OPENAI_API_KEY", "")
 
     # 2. .envにない場合、Streamlit Secretsから読み込み
     if not key1:
@@ -33,4 +34,10 @@ def load_api_keys() -> tuple[str, str]:
         except Exception:
             pass
 
-    return key1, key2
+    if not openai_key:
+        try:
+            openai_key = st.secrets.get("OPENAI_API_KEY", "")
+        except Exception:
+            pass
+
+    return key1, key2, openai_key

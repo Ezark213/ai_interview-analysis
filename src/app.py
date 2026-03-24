@@ -45,7 +45,7 @@ with st.sidebar:
 
     # APIキー読み込み（.env / Streamlit Secrets 両対応）
     from src.config import load_api_keys
-    api_key_1, api_key_2 = load_api_keys()
+    api_key_1, api_key_2, openai_key = load_api_keys()
 
     if api_key_1 and api_key_2:
         st.success("✅ APIキー1, 2が設定されています（自動切り替え有効）")
@@ -73,6 +73,22 @@ with st.sidebar:
             value=False,
             help="複数チャンクを同時に解析して処理時間を短縮します（ファイルアクセスエラーが発生する場合はOFFにしてください）"
         )
+
+    st.divider()
+
+    # Whisper文字起こしオプション
+    st.subheader("Whisper文字起こし")
+    if openai_key:
+        use_whisper = st.checkbox(
+            "Whisper文字起こしを使用",
+            value=False,
+            help="OpenAI Whisper APIで音声を文字起こしし、発言内容と非言語行動を照合します（有料: $0.006/分）"
+        )
+        if use_whisper:
+            st.caption("Whisper APIの利用には費用が発生します（約$0.006/分）")
+    else:
+        use_whisper = False
+        st.info("OpenAI APIキーを設定するとWhisper文字起こし機能が使えます")
 
     st.divider()
 
@@ -161,9 +177,30 @@ if uploaded_file is not None:
             if duration_seconds > 5400:
                 st.warning("⚠️ 90分超の長時間動画です。解析に時間がかかる場合があります。API制限エラーが発生した場合は時間をおいて再試行してください。")
 
+            # Whisper文字起こし実行（解析前）
+            transcript = None
+            transcript_result = None
+            if use_whisper:
+                with st.spinner("音声を文字起こし中..."):
+                    try:
+                        from src.whisper_transcriber import WhisperTranscriber
+                        transcriber = WhisperTranscriber(api_key=openai_key)
+                        transcript_result = transcriber.transcribe_video(str(temp_path))
+                        transcript = transcript_result.get("text", "")
+
+                        # 文字起こし結果を表示
+                        with st.expander("文字起こし結果", expanded=False):
+                            st.text(transcript)
+                            if transcript_result.get("segments"):
+                                st.caption(f"{len(transcript_result['segments'])}個のセグメントを検出")
+                    except Exception as e:
+                        st.warning(f"文字起こしに失敗しました（動画解析は続行します）: {str(e)}")
+                        transcript = None
+                        transcript_result = None
+
             with st.spinner("動画を解析中... これには数分かかることがあります"):
                 # リアルタイムログ表示エリア
-                log_container = st.expander("📝 処理ログ（リアルタイム）", expanded=True)
+                log_container = st.expander("処理ログ（リアルタイム）", expanded=True)
                 log_text = log_container.empty()
                 log_messages = []
 
@@ -200,7 +237,10 @@ if uploaded_file is not None:
                         analyzer = ChunkedVideoAnalyzer(model=model, log_callback=log_callback)
 
                         try:
-                            chunk_results = analyzer.analyze_chunks(chunks, parallel=use_parallel)
+                            chunk_results = analyzer.analyze_chunks(
+                                chunks, parallel=use_parallel,
+                                full_transcript=transcript_result
+                            )
 
                             progress_bar.progress(80)
 
@@ -243,7 +283,7 @@ if uploaded_file is not None:
 
                         # 解析実行
                         analyzer = VideoAnalyzer(api_key=api_key_1, model=model, log_callback=log_callback)
-                        result = analyzer.analyze(str(temp_path))
+                        result = analyzer.analyze(str(temp_path), transcript=transcript)
 
                     # 成功メッセージ
                     st.success("✅ 解析完了!")

@@ -69,6 +69,29 @@ class AnalysisError:
     }
 
 
+def extract_transcript_for_chunk(full_transcript: dict, start_time: int, end_time: int) -> str:
+    """
+    チャンクの時間範囲に該当するtranscriptセグメントを抽出
+
+    Args:
+        full_transcript: WhisperTranscriber.transcribe_video()の戻り値
+            {"text": "...", "segments": [{"start": 0.0, "end": 5.2, "text": "..."}]}
+        start_time: チャンクの開始時刻（秒）
+        end_time: チャンクの終了時刻（秒）
+
+    Returns:
+        str: タイムスタンプ付きの文字起こしテキスト（空の場合は""）
+    """
+    if not full_transcript or not full_transcript.get("segments"):
+        return ""
+
+    relevant = [
+        seg for seg in full_transcript["segments"]
+        if seg["start"] >= start_time and seg["end"] <= end_time
+    ]
+    return "\n".join(f"[{s['start']:.1f}s] {s['text']}" for s in relevant)
+
+
 class ChunkedVideoAnalyzer:
     """
     チャンク単位での動画解析クラス
@@ -128,12 +151,13 @@ class ChunkedVideoAnalyzer:
             return True
         return False
 
-    def analyze_chunk(self, chunk: ChunkInfo) -> Dict[str, Any]:
+    def analyze_chunk(self, chunk: ChunkInfo, transcript: str = None) -> Dict[str, Any]:
         """
         単一チャンクを解析（エラーハンドリング強化版）
 
         Args:
             chunk: チャンク情報
+            transcript: このチャンクに対応する文字起こしテキスト（オプション）
 
         Returns:
             Dict[str, Any]: 処理結果（status, error_code, 評価結果など）
@@ -199,7 +223,7 @@ class ChunkedVideoAnalyzer:
             knowledge_text = load_knowledge_base()
 
             # ステップ4: プロンプト構築
-            prompt_text = build_prompt(knowledge_text)
+            prompt_text = build_prompt(knowledge_text, transcript=transcript)
 
             # ステップ5: ファイルアップロード
             log(f"[Chunk {chunk.chunk_id}] Uploading file...")
@@ -428,7 +452,8 @@ class ChunkedVideoAnalyzer:
         self,
         chunks: List[ChunkInfo],
         parallel: bool = True,
-        max_workers: int = 3
+        max_workers: int = 3,
+        full_transcript: dict = None
     ) -> List[Dict[str, Any]]:
         """
         複数チャンクを解析（並列または順次）
@@ -437,6 +462,8 @@ class ChunkedVideoAnalyzer:
             chunks: チャンク情報のリスト
             parallel: 並列処理を使用するか（デフォルト: True）
             max_workers: 並列処理の最大ワーカー数（デフォルト: 3）
+            full_transcript: Whisper文字起こし結果（オプション）。
+                各チャンクの時間範囲に該当するセグメントを自動抽出して渡す。
 
         Returns:
             List[Dict[str, Any]]: 各チャンクの評価結果のリスト（元の順序を維持）
@@ -447,18 +474,19 @@ class ChunkedVideoAnalyzer:
         """
         if not parallel:
             # 順次処理
-            return self._analyze_chunks_sequential(chunks)
+            return self._analyze_chunks_sequential(chunks, full_transcript)
 
         # 並列処理
-        return self._analyze_chunks_parallel(chunks, max_workers)
+        return self._analyze_chunks_parallel(chunks, max_workers, full_transcript)
 
-    def _analyze_chunks_sequential(self, chunks: List[ChunkInfo]) -> List[Dict[str, Any]]:
+    def _analyze_chunks_sequential(self, chunks: List[ChunkInfo], full_transcript: dict = None) -> List[Dict[str, Any]]:
         """
         複数チャンクを順次解析
         APIキーの自動切り替えによりレート制限を回避
 
         Args:
             chunks: チャンク情報のリスト
+            full_transcript: Whisper文字起こし結果（オプション）
 
         Returns:
             List[Dict[str, Any]]: 各チャンクの評価結果のリスト
@@ -471,7 +499,13 @@ class ChunkedVideoAnalyzer:
 
         for i, chunk in enumerate(chunks):
             log(f"Processing chunk {i+1}/{total} (using API key #{self.current_key_index + 1})...")
-            result = self.analyze_chunk(chunk)
+            # チャンクに対応するtranscriptセグメントを抽出
+            chunk_transcript = None
+            if full_transcript:
+                chunk_transcript = extract_transcript_for_chunk(
+                    full_transcript, chunk.start_time, chunk.end_time
+                )
+            result = self.analyze_chunk(chunk, transcript=chunk_transcript)
             results.append(result)
 
             # APIクォータエラーの場合、次のキーに切り替え
@@ -486,7 +520,8 @@ class ChunkedVideoAnalyzer:
     def _analyze_chunks_parallel(
         self,
         chunks: List[ChunkInfo],
-        max_workers: int
+        max_workers: int,
+        full_transcript: dict = None
     ) -> List[Dict[str, Any]]:
         """
         複数チャンクを並列解析
@@ -494,6 +529,7 @@ class ChunkedVideoAnalyzer:
         Args:
             chunks: チャンク情報のリスト
             max_workers: 並列処理の最大ワーカー数
+            full_transcript: Whisper文字起こし結果（オプション）
 
         Returns:
             List[Dict[str, Any]]: 各チャンクの評価結果のリスト（元の順序を維持）
@@ -503,11 +539,16 @@ class ChunkedVideoAnalyzer:
 
         # ThreadPoolExecutorで並列処理
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            # 各チャンクの解析タスクを投入
-            future_to_chunk = {
-                executor.submit(self.analyze_chunk, chunk): chunk
-                for chunk in chunks
-            }
+            # 各チャンクの解析タスクを投入（チャンク別transcript抽出）
+            future_to_chunk = {}
+            for chunk in chunks:
+                chunk_transcript = None
+                if full_transcript:
+                    chunk_transcript = extract_transcript_for_chunk(
+                        full_transcript, chunk.start_time, chunk.end_time
+                    )
+                future = executor.submit(self.analyze_chunk, chunk, transcript=chunk_transcript)
+                future_to_chunk[future] = chunk
 
             # 完了したタスクから結果を取得
             for future in as_completed(future_to_chunk):
