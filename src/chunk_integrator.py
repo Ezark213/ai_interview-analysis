@@ -1,4 +1,5 @@
 """チャンク評価結果の統合モジュール"""
+from collections import Counter
 from typing import List, Dict, Any, Tuple
 from statistics import mean, median
 
@@ -70,11 +71,15 @@ class ChunkIntegrator:
         # 3. 総合評価生成
         overall_evaluation = self._generate_overall_evaluation(successful_chunks)
 
-        # 4. 統合結果を構築
+        # 4. 行動メトリクスのマージ
+        merged_metrics = self._merge_behavioral_metrics(successful_chunks)
+
+        # 5. 統合結果を構築
         integrated_result = {
             "overall_risk_score": overall_evaluation["overall_risk_score"],
             "risk_level": overall_evaluation["risk_level"],
             "evaluation": overall_evaluation["evaluation"],
+            "behavioral_metrics": merged_metrics,
             "red_flags": overall_evaluation["red_flags"],
             "positive_signals": overall_evaluation["positive_signals"],
             "recommendation": overall_evaluation["recommendation"],
@@ -297,3 +302,40 @@ class ChunkIntegrator:
                 return f"慎重な判断が必要です。特に以下のリスク要因について詳細確認を推奨します: {', '.join(red_flags[:3])}"
             else:
                 return "慎重な判断が必要です。複数の面接官による再評価を検討してください。"
+
+    def _merge_behavioral_metrics(self, chunk_results: List[Dict[str, Any]]) -> dict:
+        """
+        チャンク間の行動メトリクスを最頻値でマージ
+
+        Args:
+            chunk_results: 各チャンクの評価結果
+
+        Returns:
+            dict: マージされた行動メトリクス（全チャンクにメトリクスがない場合はNone）
+        """
+        metric_keys = [
+            "eye_contact_quality", "gesture_naturalness", "posture_stability",
+            "speech_fluency", "filler_frequency", "response_speed",
+            "verbal_nonverbal_consistency",
+        ]
+
+        # 各チャンクからメトリクスを収集
+        all_metrics = [
+            chunk["behavioral_metrics"]
+            for chunk in chunk_results
+            if chunk.get("behavioral_metrics")
+        ]
+
+        if not all_metrics:
+            return None
+
+        # 各指標について最頻値を算出
+        merged = {}
+        for key in metric_keys:
+            values = [m[key] for m in all_metrics if key in m]
+            if values:
+                merged[key] = Counter(values).most_common(1)[0][0]
+            else:
+                merged[key] = None
+
+        return merged

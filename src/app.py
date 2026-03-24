@@ -26,6 +26,7 @@ if str(project_root) not in sys.path:
 import streamlit as st
 import os
 import json
+import pandas as pd
 from datetime import datetime
 
 # ページ設定
@@ -92,6 +93,32 @@ with st.sidebar:
 
     st.divider()
 
+    # 評価基準プリセット選択
+    st.subheader("評価基準")
+    from src.knowledge_loader import list_presets, load_combined_knowledge
+
+    presets = list_presets()
+    preset_options = {"デフォルト（SES面談）": None}
+    for p in presets:
+        preset_options[p["name"]] = p["id"]
+
+    selected_preset_name = st.selectbox(
+        "評価基準プリセット",
+        list(preset_options.keys()),
+        help="面接の種類に合った評価基準を選択"
+    )
+    selected_preset = preset_options[selected_preset_name]
+
+    # カスタムナレッジベースのアップロード
+    uploaded_kb = st.file_uploader(
+        "カスタム評価基準（.md）をアップロード（オプション）",
+        type=["md"],
+        help="独自の評価基準をMarkdown形式でアップロードできます"
+    )
+    custom_content = uploaded_kb.read().decode("utf-8") if uploaded_kb else None
+
+    st.divider()
+
     st.info("""
     **使い方:**
     1. 面談動画をアップロード
@@ -151,6 +178,16 @@ if uploaded_file is not None:
         if not api_key_1:
             st.error("❌ APIキーが設定されていません。.envファイルまたはStreamlit Secretsを確認してください。")
         else:
+            # ナレッジベースの読み込み
+            try:
+                knowledge_text = load_combined_knowledge(
+                    preset_id=selected_preset,
+                    custom_content=custom_content
+                )
+            except (ValueError, FileNotFoundError) as e:
+                st.error(f"❌ ナレッジベースの読み込みに失敗: {e}")
+                knowledge_text = None
+
             # 動画の長さを取得してスマートチャンク分割戦略を決定
             from src.video_chunker import VideoChunker, get_video_duration, calculate_chunk_strategy
 
@@ -239,7 +276,8 @@ if uploaded_file is not None:
                         try:
                             chunk_results = analyzer.analyze_chunks(
                                 chunks, parallel=use_parallel,
-                                full_transcript=transcript_result
+                                full_transcript=transcript_result,
+                                knowledge_text=knowledge_text
                             )
 
                             progress_bar.progress(80)
@@ -283,7 +321,7 @@ if uploaded_file is not None:
 
                         # 解析実行
                         analyzer = VideoAnalyzer(api_key=api_key_1, model=model, log_callback=log_callback)
-                        result = analyzer.analyze(str(temp_path), transcript=transcript)
+                        result = analyzer.analyze(str(temp_path), transcript=transcript, knowledge_text=knowledge_text)
 
                     # 成功メッセージ
                     st.success("✅ 解析完了!")
@@ -366,6 +404,21 @@ if uploaded_file is not None:
                     disclaimer = result.get("disclaimer", "")
                     if disclaimer:
                         st.warning(disclaimer)
+
+                    # 行動メトリクス
+                    metrics = result.get("behavioral_metrics")
+                    if metrics:
+                        st.header("行動メトリクス")
+                        metrics_df = pd.DataFrame([
+                            {"指標": "アイコンタクトの質", "評価": metrics.get("eye_contact_quality", "-")},
+                            {"指標": "ジェスチャーの自然さ", "評価": metrics.get("gesture_naturalness", "-")},
+                            {"指標": "姿勢の安定性", "評価": metrics.get("posture_stability", "-")},
+                            {"指標": "発話の流暢さ", "評価": metrics.get("speech_fluency", "-")},
+                            {"指標": "フィラーの頻度", "評価": metrics.get("filler_frequency", "-")},
+                            {"指標": "応答速度", "評価": metrics.get("response_speed", "-")},
+                            {"指標": "言語-非言語の一致度", "評価": metrics.get("verbal_nonverbal_consistency", "-")},
+                        ])
+                        st.table(metrics_df)
 
                     # チャンク別詳細（チャンク解析を使用した場合のみ）
                     if 'chunk_results' in st.session_state and st.session_state['chunk_results']:

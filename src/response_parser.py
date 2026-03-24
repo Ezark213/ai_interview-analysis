@@ -197,6 +197,47 @@ def _validate_structure(data: Dict[str, Any]) -> None:
                 f"Score out of range (0-100) in {category}: {cat_score}"
             )
 
+    # behavioral_metricsは任意フィールド（後方互換: 存在しなければNoneに正規化）
+    if "behavioral_metrics" not in data:
+        data["behavioral_metrics"] = None
+
+
+# 行動メトリクスの有効な値定義
+_VALID_METRICS = {
+    "eye_contact_quality": {"高", "中", "低"},
+    "gesture_naturalness": {"高", "中", "低"},
+    "posture_stability": {"高", "中", "低"},
+    "speech_fluency": {"高", "中", "低"},
+    "filler_frequency": {"多い", "普通", "少ない"},
+    "response_speed": {"速い", "適切", "遅い"},
+    "verbal_nonverbal_consistency": {"一致", "部分一致", "不一致"},
+}
+
+
+def validate_behavioral_metrics(metrics: dict) -> list:
+    """
+    行動メトリクスのバリデーション（Iteration-10追加）
+
+    Args:
+        metrics: behavioral_metricsの辞書（Noneの場合は空リストを返す）
+
+    Returns:
+        list: 警告メッセージのリスト
+    """
+    if not metrics:
+        return []
+
+    warnings = []
+
+    for key, valid_values in _VALID_METRICS.items():
+        value = metrics.get(key)
+        if value is not None and value not in valid_values:
+            warnings.append(
+                f"behavioral_metrics.{key} の値が不正です: '{value}'（有効値: {valid_values}）"
+            )
+
+    return warnings
+
 
 def validate_response(data: Dict[str, Any]) -> list:
     """
