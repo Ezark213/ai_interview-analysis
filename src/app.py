@@ -145,7 +145,6 @@ with st.sidebar:
 | Gemini API | {'✅ ' + gemini_status if api_key_1 else '❌ ' + gemini_status} |
 | OpenAI API | {'✅ ' + openai_status if openai_key else '➖ ' + openai_status} |
 | Whisper | {whisper_status} |
-| 評価基準 | SES面談 |
 """)
 
 
