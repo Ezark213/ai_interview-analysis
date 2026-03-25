@@ -79,7 +79,9 @@ class TestChunkedVideoAnalyzer:
                 "communication": {"score": 75, "observations": ["明瞭な発話（参照: コミュニケーション基準）"], "confidence": "高"},
                 "stress_tolerance": {"score": 65, "observations": ["落ち着いている（参照: ストレス耐性基準）"], "confidence": "中"},
                 "reliability": {"score": 70, "observations": ["具体的な説明（参照: 信頼性評価基準）"], "confidence": "高"},
-                "teamwork": {"score": 70, "observations": ["協調的（参照: チームワーク基準）"], "confidence": "中"}
+                "teamwork": {"score": 70, "observations": ["協調的（参照: チームワーク基準）"], "confidence": "中"},
+                "credibility": {"score": 65, "observations": ["検証可能な詳細あり（参照: 信頼度基準）"], "confidence": "中"},
+                "professional_demeanor": {"score": 65, "observations": ["敬語適切（参照: 職業的態度基準）"], "confidence": "中"}
             },
             "behavioral_metrics": None,
             "red_flags": [],

@@ -21,6 +21,16 @@
       "score": 65,
       "observations": ["チーム経験について前向きに語る"],
       "confidence": "中"
+    },
+    "credibility": {
+      "score": 60,
+      "observations": ["検証可能な詳細がやや不足"],
+      "confidence": "中"
+    },
+    "professional_demeanor": {
+      "score": 65,
+      "observations": ["敬語は適切に使用"],
+      "confidence": "中"
     }
   },
   "red_flags": [],

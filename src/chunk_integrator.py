@@ -16,7 +16,10 @@ class ChunkIntegrator:
 
     def __init__(self):
         """初期化"""
-        self.category_keys = ["communication", "stress_tolerance", "reliability", "teamwork"]
+        self.category_keys = [
+            "communication", "stress_tolerance", "reliability",
+            "teamwork", "credibility", "professional_demeanor"
+        ]
 
     def integrate_chunks(self, chunk_results: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -219,14 +222,14 @@ class ChunkIntegrator:
         # 2. 総合スコアを計算（各カテゴリーの中央値の平均）
         overall_score = int(mean(category_scores.values()))
 
-        # 3. リスクレベルを判定
-        if overall_score >= 80:
+        # 3. リスクレベルを判定（Iteration-14: 閾値厳格化）
+        if overall_score >= 85:
             risk_level = "非常に低い"
         elif overall_score >= 70:
             risk_level = "低"
-        elif overall_score >= 60:
+        elif overall_score >= 55:
             risk_level = "中"
-        elif overall_score >= 50:
+        elif overall_score >= 40:
             risk_level = "やや高"
         else:
             risk_level = "高"
@@ -288,20 +291,25 @@ class ChunkIntegrator:
         Returns:
             str: 推奨事項
         """
-        if score >= 80 and not red_flags:
+        if score >= 85 and not red_flags:
             return "優秀な候補者です。アサインを強く推奨します。"
         elif score >= 70 and len(red_flags) <= 1:
             return "良好な評価です。アサインを推奨しますが、気になる点があれば追加確認を検討してください。"
-        elif score >= 60:
+        elif score >= 55:
             if red_flags:
-                return f"中程度の評価です。以下の点について追加面談での確認を推奨します: {', '.join(red_flags[:2])}"
+                return f"標準的な評価です。以下の点について追加面談での確認を推奨します: {', '.join(red_flags[:2])}"
             else:
-                return "中程度の評価です。実務経験や技術スキルの追加確認を推奨します。"
-        else:
+                return "標準的な評価です。実務経験や技術スキルの追加確認を推奨します。"
+        elif score >= 40:
             if red_flags:
                 return f"慎重な判断が必要です。特に以下のリスク要因について詳細確認を推奨します: {', '.join(red_flags[:3])}"
             else:
                 return "慎重な判断が必要です。複数の面接官による再評価を検討してください。"
+        else:
+            if red_flags:
+                return f"高リスクと判定されました。以下の重大なリスク要因があります: {', '.join(red_flags[:3])}"
+            else:
+                return "高リスクと判定されました。アサインは推奨しません。複数の面接官による再評価を検討してください。"
 
     def _merge_behavioral_metrics(self, chunk_results: List[Dict[str, Any]]) -> dict:
         """

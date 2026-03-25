@@ -68,6 +68,8 @@ class TestFileStateWaiting:
                 "stress_tolerance": {"score": 50, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
                 "reliability": {"score": 50, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
                 "teamwork": {"score": 50, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
+                "credibility": {"score": 50, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
+                "professional_demeanor": {"score": 50, "observations": ["テスト（参照: 基準）"], "confidence": "中"},
             },
             "behavioral_metrics": None,
             "red_flags": [],

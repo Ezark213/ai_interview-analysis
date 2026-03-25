@@ -29,6 +29,20 @@
         "チーム経験の言及が限定的（参照: 協調性評価基準）"
       ],
       "confidence": "低"
+    },
+    "credibility": {
+      "score": 45,
+      "observations": [
+        "検証可能な詳細がほとんどない（参照: 信頼度評価基準）"
+      ],
+      "confidence": "低"
+    },
+    "professional_demeanor": {
+      "score": 50,
+      "observations": [
+        "職業的態度の評価材料が不足（参照: 職業的態度評価基準）"
+      ],
+      "confidence": "低"
     }
   },
   "red_flags": [],

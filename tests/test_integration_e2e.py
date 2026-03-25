@@ -44,6 +44,16 @@ def mock_gemini_response():
                 "score": 85,
                 "observations": ["協力的な姿勢（参照: チームワーク基準）"],
                 "confidence": "高"
+            },
+            "credibility": {
+                "score": 75,
+                "observations": ["検証可能な詳細あり（参照: 信頼度基準）"],
+                "confidence": "中"
+            },
+            "professional_demeanor": {
+                "score": 80,
+                "observations": ["敬語が適切（参照: 職業的態度基準）"],
+                "confidence": "高"
             }
         },
         "behavioral_metrics": None,

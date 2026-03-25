@@ -31,6 +31,20 @@
         "他者への批判的発言が目立つ（参照: 協調性評価基準）"
       ],
       "confidence": "高"
+    },
+    "credibility": {
+      "score": 80,
+      "observations": [
+        "検証可能な詳細がある程度含まれる（参照: 信頼度評価基準）"
+      ],
+      "confidence": "中"
+    },
+    "professional_demeanor": {
+      "score": 85,
+      "observations": [
+        "敬語は適切（参照: 職業的態度評価基準）"
+      ],
+      "confidence": "高"
     }
   },
   "red_flags": [],

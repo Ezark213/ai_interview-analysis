@@ -1,12 +1,17 @@
 """APIキー読み込みのテスト
 
 .env（ローカル）とStreamlit Secrets（クラウド）の両対応テスト。
-優先順位: .env > Streamlit Secrets
+優先順位: session_state（UI入力）> .env > Streamlit Secrets
 """
 import os
 import pytest
 from unittest.mock import patch, MagicMock
 from src.config import load_api_keys
+
+
+def _empty_session_state():
+    """UI入力なし（session_state空）をシミュレートするモック"""
+    return MagicMock(get=MagicMock(return_value=""))
 
 
 class TestLoadApiKeys:
@@ -36,6 +41,7 @@ class TestLoadApiKeys:
 
         with patch("src.config.st") as mock_st, \
              patch("src.config.load_dotenv"):  # .envからの再読み込みを防止
+            mock_st.session_state = _empty_session_state()
             mock_st.secrets = mock_secrets
             key1, key2, _ = load_api_keys()
 
@@ -55,12 +61,31 @@ class TestLoadApiKeys:
         }.get(key, default)
 
         with patch("src.config.st") as mock_st:
+            mock_st.session_state = _empty_session_state()
             mock_st.secrets = mock_secrets
             key1, key2, _ = load_api_keys()
 
         # .envの値が優先される
         assert key1 == "env-key-1"
         assert key2 == "env-key-2"
+
+    def test_session_state_takes_precedence_over_env(self, monkeypatch):
+        """session_state（UI入力）が.envより優先される"""
+        monkeypatch.setenv("GEMINI_API_KEY_1", "env-key-1")
+        monkeypatch.setenv("GEMINI_API_KEY_2", "env-key-2")
+
+        with patch("src.config.st") as mock_st:
+            mock_st.session_state = MagicMock(
+                get=MagicMock(side_effect=lambda key, default="": {
+                    "gemini_api_key_1": "ui-key-1",
+                    "gemini_api_key_2": "ui-key-2",
+                    "openai_api_key": "",
+                }.get(key, default))
+            )
+            key1, key2, _ = load_api_keys()
+
+        assert key1 == "ui-key-1"
+        assert key2 == "ui-key-2"
 
 
 class TestLoadOpenAIApiKey:
@@ -96,6 +121,7 @@ class TestLoadOpenAIApiKey:
 
         with patch("src.config.st") as mock_st, \
              patch("src.config.load_dotenv"):
+            mock_st.session_state = _empty_session_state()
             mock_st.secrets = mock_secrets
             result = load_api_keys()
 
@@ -117,6 +143,7 @@ class TestLoadOpenAIApiKey:
         }.get(key, default)
 
         with patch("src.config.st") as mock_st:
+            mock_st.session_state = _empty_session_state()
             mock_st.secrets = mock_secrets
             result = load_api_keys()
 

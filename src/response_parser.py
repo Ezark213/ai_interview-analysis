@@ -27,7 +27,8 @@ def parse_response(response_text: str) -> Dict[str, Any]:
         - 必須フィールド: overall_risk_score, risk_level, evaluation,
                         red_flags, positive_signals, recommendation, disclaimer
         - evaluationの必須カテゴリ: communication, stress_tolerance,
-                                    reliability, teamwork
+                                    reliability, teamwork, credibility,
+                                    professional_demeanor
         - スコアの範囲: 0-100
     """
     # JSONコンテンツの抽出
@@ -177,8 +178,11 @@ def _validate_structure(data: Dict[str, Any]) -> None:
     if not isinstance(evaluation, dict):
         raise ResponseValidationError("evaluation must be a dictionary")
 
-    # 必須評価カテゴリ
-    required_categories = ["communication", "stress_tolerance", "reliability", "teamwork"]
+    # 必須評価カテゴリ（6カテゴリ）
+    required_categories = [
+        "communication", "stress_tolerance", "reliability",
+        "teamwork", "credibility", "professional_demeanor"
+    ]
     for category in required_categories:
         if category not in evaluation:
             raise ResponseValidationError(f"Missing evaluation category: {category}")
@@ -251,10 +255,11 @@ def validate_response(data: Dict[str, Any]) -> list:
 
     仮定:
         - 出典形式: 「(参照: <セクション名>)」または「（参照: <セクション名>）」
-        - 確信度「低」の閾値: 4カテゴリ中3つ以上で警告
+        - 確信度「低」の閾値: カテゴリの75%以上で警告
         - 矛盾の定義:
-          1. スコア80以上なのに否定的な観察事実
-          2. スコア80以上なのに確信度「低」
+          1. スコア70以上なのに否定的な観察事実
+          2. スコア70以上なのに確信度「低」
+        - スコア分布チェック: 全カテゴリ80点以上の場合に警告
     """
     warnings = []
 
@@ -269,6 +274,10 @@ def validate_response(data: Dict[str, Any]) -> list:
     # 3. 矛盾検出
     contradiction_warnings = _check_contradictions(data)
     warnings.extend(contradiction_warnings)
+
+    # 4. スコア分布チェック（Iteration-14追加）
+    distribution_warnings = _check_score_distribution(data)
+    warnings.extend(distribution_warnings)
 
     return warnings
 
@@ -310,7 +319,7 @@ def _check_low_confidence_threshold(data: Dict[str, Any]) -> list:
         list: 確信度関連の警告リスト
 
     仮定:
-        - 4カテゴリ中3つ以上が確信度「低」の場合、警告
+        - カテゴリの75%以上が確信度「低」の場合、警告
     """
     warnings = []
     evaluation = data.get("evaluation", {})
@@ -326,8 +335,9 @@ def _check_low_confidence_threshold(data: Dict[str, Any]) -> list:
         if confidence == "低":
             low_confidence_count += 1
 
-    # 閾値チェック: 3つ以上（75%以上）で警告
-    if low_confidence_count >= 3:
+    # 閾値チェック: 75%以上で警告
+    threshold = max(3, int(total_categories * 0.75))
+    if low_confidence_count >= threshold:
         warnings.append(
             f"確信度が低い評価が多すぎます: {low_confidence_count}/{total_categories}カテゴリが確信度「低」。"
             f"評価の信頼性に問題がある可能性があります。"
@@ -347,8 +357,8 @@ def _check_contradictions(data: Dict[str, Any]) -> list:
         list: 矛盾関連の警告リスト
 
     仮定:
-        - 矛盾1: スコア80以上（高評価）なのに否定的キーワードを含む観察事実
-        - 矛盾2: スコア80以上（高評価）なのに確信度「低」
+        - 矛盾1: スコア70以上（高評価）なのに否定的キーワードを含む観察事実
+        - 矛盾2: スコア70以上（高評価）なのに確信度「低」
         - 否定的キーワード: 不安定、不明瞭、矛盾、避ける、批判的、回避、不十分、欠如
     """
     warnings = []
@@ -365,8 +375,8 @@ def _check_contradictions(data: Dict[str, Any]) -> list:
         observations = category_data.get("observations", [])
         confidence = category_data.get("confidence", "")
 
-        # 矛盾1: 高スコア（80以上）なのに否定的な観察事実
-        if score >= 80:
+        # 矛盾1: 高スコア（70以上）なのに否定的な観察事実
+        if score >= 70:
             for obs in observations:
                 for keyword in negative_keywords:
                     if keyword in obs:
@@ -376,11 +386,47 @@ def _check_contradictions(data: Dict[str, Any]) -> list:
                         )
                         break  # 同じ観察事実で複数警告を出さない
 
-        # 矛盾2: 高スコア（80以上）なのに確信度「低」
-        if score >= 80 and confidence == "低":
+        # 矛盾2: 高スコア（70以上）なのに確信度「低」
+        if score >= 70 and confidence == "低":
             warnings.append(
                 f"矛盾を検出: カテゴリ'{category}'はスコア{score}（高評価）ですが、"
                 f"確信度が「低」となっています。評価の整合性を確認してください。"
             )
+
+    return warnings
+
+
+def _check_score_distribution(data: Dict[str, Any]) -> list:
+    """
+    スコア分布チェック（Iteration-14追加）
+
+    全カテゴリが80点以上の場合、スコアの偏りを警告する。
+    BARSベースの評価では全カテゴリ高スコアは稀であり、
+    甘め評価の兆候として警告する。
+
+    Args:
+        data: 解析されたJSON辞書
+
+    Returns:
+        list: スコア分布関連の警告リスト
+    """
+    warnings = []
+    evaluation = data.get("evaluation", {})
+
+    if not evaluation:
+        return warnings
+
+    scores = []
+    for category, category_data in evaluation.items():
+        score = category_data.get("score", 0)
+        scores.append(score)
+
+    # 全カテゴリが80点以上の場合に警告
+    if scores and all(s >= 80 for s in scores):
+        avg_score = sum(scores) / len(scores)
+        warnings.append(
+            f"スコア分布の偏り: 全{len(scores)}カテゴリが80点以上（平均{avg_score:.0f}点）です。"
+            f"BARSレベル5の行動証拠が各カテゴリで十分に確認されているか再検証してください。"
+        )
 
     return warnings

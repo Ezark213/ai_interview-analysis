@@ -94,7 +94,9 @@ print("test")
                 "communication": {"score": 75, "observations": [], "confidence": "高"},
                 "stress_tolerance": {"score": 60, "observations": [], "confidence": "中"},
                 "reliability": {"score": 70, "observations": [], "confidence": "高"},
-                "teamwork": {"score": 65, "observations": [], "confidence": "中"}
+                "teamwork": {"score": 65, "observations": [], "confidence": "中"},
+                "credibility": {"score": 60, "observations": [], "confidence": "中"},
+                "professional_demeanor": {"score": 65, "observations": [], "confidence": "中"}
             },
             "red_flags": [],
             "positive_signals": [],
@@ -124,7 +126,9 @@ print("test")
                 # "communication"が欠けている
                 "stress_tolerance": {"score": 60, "observations": [], "confidence": "中"},
                 "reliability": {"score": 70, "observations": [], "confidence": "高"},
-                "teamwork": {"score": 65, "observations": [], "confidence": "中"}
+                "teamwork": {"score": 65, "observations": [], "confidence": "中"},
+                "credibility": {"score": 60, "observations": [], "confidence": "中"},
+                "professional_demeanor": {"score": 65, "observations": [], "confidence": "中"}
             },
             "red_flags": [],
             "positive_signals": [],
@@ -213,10 +217,12 @@ class TestHallucinationPrevention:
             "overall_risk_score": 75,
             "risk_level": "低",
             "evaluation": {
-                "communication": {"score": 80, "observations": ["test（参照: test）"], "confidence": "高"},
+                "communication": {"score": 75, "observations": ["test（参照: test）"], "confidence": "高"},
                 "stress_tolerance": {"score": 75, "observations": ["test（参照: test）"], "confidence": "高"},
                 "reliability": {"score": 70, "observations": ["test（参照: test）"], "confidence": "中"},
-                "teamwork": {"score": 75, "observations": ["test（参照: test）"], "confidence": "中"}
+                "teamwork": {"score": 75, "observations": ["test（参照: test）"], "confidence": "中"},
+                "credibility": {"score": 70, "observations": ["test（参照: test）"], "confidence": "高"},
+                "professional_demeanor": {"score": 70, "observations": ["test（参照: test）"], "confidence": "中"}
             },
             "red_flags": [],
             "positive_signals": [],

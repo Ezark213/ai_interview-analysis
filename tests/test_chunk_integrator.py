@@ -13,32 +13,42 @@ class TestChunkIntegrator:
 
     @pytest.fixture
     def sample_chunk_results(self):
-        """サンプルのチャンク評価結果（3チャンク）"""
+        """サンプルのチャンク評価結果（3チャンク、6カテゴリ）"""
         return [
             {
                 "chunk_id": 0,
                 "chunk_time_range": {"start": 0, "end": 300},
-                "overall_risk_score": 85,
+                "overall_risk_score": 75,
                 "risk_level": "低",
                 "evaluation": {
                     "communication": {
-                        "score": 80,
+                        "score": 70,
                         "observations": ["明瞭な発話"],
                         "confidence": "高"
                     },
                     "stress_tolerance": {
-                        "score": 85,
+                        "score": 75,
                         "observations": ["冷静に対応"],
                         "confidence": "高"
                     },
                     "reliability": {
-                        "score": 90,
+                        "score": 80,
                         "observations": ["具体的なエピソード"],
                         "confidence": "高"
                     },
                     "teamwork": {
-                        "score": 85,
+                        "score": 75,
                         "observations": ["協力的な姿勢"],
+                        "confidence": "中"
+                    },
+                    "credibility": {
+                        "score": 70,
+                        "observations": ["検証可能な詳細あり"],
+                        "confidence": "高"
+                    },
+                    "professional_demeanor": {
+                        "score": 75,
+                        "observations": ["敬語が適切"],
                         "confidence": "中"
                     }
                 },
@@ -48,27 +58,37 @@ class TestChunkIntegrator:
             {
                 "chunk_id": 1,
                 "chunk_time_range": {"start": 300, "end": 600},
-                "overall_risk_score": 80,
+                "overall_risk_score": 70,
                 "risk_level": "低",
                 "evaluation": {
                     "communication": {
-                        "score": 75,
+                        "score": 65,
                         "observations": ["質問に的確に回答"],
                         "confidence": "高"
                     },
                     "stress_tolerance": {
-                        "score": 80,
+                        "score": 70,
                         "observations": ["落ち着いた様子"],
                         "confidence": "中"
                     },
                     "reliability": {
-                        "score": 85,
+                        "score": 75,
                         "observations": ["誠実な回答"],
                         "confidence": "高"
                     },
                     "teamwork": {
-                        "score": 80,
+                        "score": 70,
                         "observations": ["チーム経験を説明"],
+                        "confidence": "高"
+                    },
+                    "credibility": {
+                        "score": 65,
+                        "observations": ["ある程度の具体性あり"],
+                        "confidence": "中"
+                    },
+                    "professional_demeanor": {
+                        "score": 70,
+                        "observations": ["マナーは標準的"],
                         "confidence": "高"
                     }
                 },
@@ -78,27 +98,37 @@ class TestChunkIntegrator:
             {
                 "chunk_id": 2,
                 "chunk_time_range": {"start": 600, "end": 900},
-                "overall_risk_score": 90,
-                "risk_level": "非常に低い",
+                "overall_risk_score": 80,
+                "risk_level": "低",
                 "evaluation": {
                     "communication": {
-                        "score": 85,
+                        "score": 75,
                         "observations": ["明瞭な発話", "具体例を交えた説明"],
                         "confidence": "高"
                     },
                     "stress_tolerance": {
-                        "score": 90,
+                        "score": 80,
                         "observations": ["難しい質問でも冷静"],
                         "confidence": "高"
                     },
                     "reliability": {
-                        "score": 95,
+                        "score": 85,
                         "observations": ["過去の実績を明確に説明"],
                         "confidence": "高"
                     },
                     "teamwork": {
-                        "score": 90,
+                        "score": 80,
                         "observations": ["協力的な姿勢", "リーダーシップも発揮"],
+                        "confidence": "高"
+                    },
+                    "credibility": {
+                        "score": 75,
+                        "observations": ["検証可能な詳細が豊富"],
+                        "confidence": "高"
+                    },
+                    "professional_demeanor": {
+                        "score": 80,
+                        "observations": ["貢献志向が明確"],
                         "confidence": "高"
                     }
                 },
@@ -112,15 +142,22 @@ class TestChunkIntegrator:
         single_chunk = [{
             "chunk_id": 0,
             "chunk_time_range": {"start": 0, "end": 300},
-            "overall_risk_score": 85,
-            "evaluation": {"communication": {"score": 85, "observations": [], "confidence": "高"}},
+            "overall_risk_score": 75,
+            "evaluation": {
+                "communication": {"score": 75, "observations": [], "confidence": "高"},
+                "stress_tolerance": {"score": 70, "observations": [], "confidence": "高"},
+                "reliability": {"score": 75, "observations": [], "confidence": "高"},
+                "teamwork": {"score": 70, "observations": [], "confidence": "中"},
+                "credibility": {"score": 70, "observations": [], "confidence": "中"},
+                "professional_demeanor": {"score": 70, "observations": [], "confidence": "中"}
+            },
             "red_flags": [],
             "positive_signals": []
         }]
 
         result = integrator.integrate_chunks(single_chunk)
 
-        assert result["overall_risk_score"] == 85
+        assert result["overall_risk_score"] == 75
         assert "chunk_id" not in result
         assert "chunk_time_range" not in result
 
@@ -141,14 +178,16 @@ class TestChunkIntegrator:
         # チャンク分析情報の検証
         assert result["chunk_analysis"]["num_chunks"] == 3
 
-        # 総合スコアは中央値ベース（85, 80, 90の中央値 = 85）
-        assert 80 <= result["overall_risk_score"] <= 90
+        # 総合スコアは中央値ベース
+        assert 65 <= result["overall_risk_score"] <= 85
 
-        # 各カテゴリーのスコアを検証
+        # 各カテゴリーのスコアを検証（6カテゴリ）
         assert "communication" in result["evaluation"]
         assert "stress_tolerance" in result["evaluation"]
         assert "reliability" in result["evaluation"]
         assert "teamwork" in result["evaluation"]
+        assert "credibility" in result["evaluation"]
+        assert "professional_demeanor" in result["evaluation"]
 
     def test_check_consistency_stable_scores(self, integrator, sample_chunk_results):
         """一貫性チェック: スコアが安定している場合"""
@@ -226,7 +265,7 @@ class TestChunkIntegrator:
     def test_generate_recommendation_high_score(self, integrator):
         """推奨事項生成: 高得点の場合"""
         recommendation = integrator._generate_recommendation(
-            score=85,
+            score=90,
             risk_level="非常に低い",
             red_flags=[],
             positive_signals=["優秀"]

@@ -114,7 +114,9 @@ class TestVideoAnalyzer:
                     "communication": {"score": 70, "observations": [], "confidence": "高"},
                     "stress_tolerance": {"score": 70, "observations": [], "confidence": "高"},
                     "reliability": {"score": 70, "observations": [], "confidence": "高"},
-                    "teamwork": {"score": 70, "observations": [], "confidence": "高"}
+                    "teamwork": {"score": 70, "observations": [], "confidence": "高"},
+                    "credibility": {"score": 65, "observations": [], "confidence": "中"},
+                    "professional_demeanor": {"score": 65, "observations": [], "confidence": "中"}
                 },
                 "red_flags": [],
                 "positive_signals": [],
