@@ -148,8 +148,8 @@ with st.sidebar:
 """)
 
 
-# ===== メインエリア: 3タブ構造 =====
-tab_single, tab_batch, tab_settings = st.tabs(["単一動画解析", "バッチ処理", "設定"])
+# ===== メインエリア: 4タブ構造 =====
+tab_single, tab_batch, tab_settings, tab_feedback = st.tabs(["単一動画解析", "バッチ処理", "設定", "フィードバック"])
 
 
 # ==========================================
@@ -922,6 +922,90 @@ with tab_batch:
 
     elif not uploaded_files:
         st.info("複数の動画ファイルをアップロードしてバッチ解析を開始してください")
+
+
+# ==========================================
+# タブ4: フィードバック
+# ==========================================
+with tab_feedback:
+    st.header("フィードバック")
+    st.markdown("ご意見・ご要望・バグ報告をお送りください。GitHub Issueとして管理され、メールでも通知されます。")
+
+    with st.form("feedback_form", clear_on_submit=True):
+        fb_name = st.text_input("お名前（任意）", placeholder="匿名でもOK")
+        fb_category = st.selectbox(
+            "カテゴリ",
+            ["バグ報告", "機能リクエスト", "UI改善", "評価精度", "その他"],
+        )
+        fb_title = st.text_input("タイトル", placeholder="例: レーダーチャートが表示されない")
+        fb_body = st.text_area(
+            "詳細",
+            height=150,
+            placeholder="具体的な状況、再現手順、改善案などをお書きください",
+        )
+        fb_submitted = st.form_submit_button("送信", type="primary", use_container_width=True)
+
+    if fb_submitted:
+        if not fb_title.strip():
+            st.error("タイトルを入力してください。")
+        else:
+            from src.feedback import submit_feedback
+
+            # GitHub Token取得
+            gh_token = os.getenv("GITHUB_TOKEN", "")
+            if not gh_token:
+                try:
+                    gh_token = st.secrets.get("GITHUB_TOKEN", "")
+                except Exception:
+                    pass
+
+            # SMTP設定取得
+            smtp_config = {}
+            smtp_host = os.getenv("SMTP_HOST", "")
+            if not smtp_host:
+                try:
+                    smtp_host = st.secrets.get("SMTP_HOST", "")
+                except Exception:
+                    pass
+            if smtp_host:
+                smtp_config = {
+                    "host": smtp_host,
+                    "port": os.getenv("SMTP_PORT", "") or st.secrets.get("SMTP_PORT", "587"),
+                    "user": os.getenv("SMTP_USER", "") or st.secrets.get("SMTP_USER", ""),
+                    "password": os.getenv("SMTP_PASSWORD", "") or st.secrets.get("SMTP_PASSWORD", ""),
+                    "to_email": os.getenv("FEEDBACK_EMAIL", "") or st.secrets.get("FEEDBACK_EMAIL", "yiwao@arma-as.co.jp"),
+                }
+
+            if not gh_token and not smtp_config:
+                st.warning("フィードバック送信の設定がされていません（GITHUB_TOKEN または SMTP設定が必要です）。管理者に連絡してください。")
+            else:
+                with st.spinner("送信中..."):
+                    result = submit_feedback(
+                        title=fb_title.strip(),
+                        body=fb_body.strip(),
+                        category=fb_category,
+                        sender_name=fb_name.strip() or "匿名",
+                        github_token=gh_token,
+                        smtp_config=smtp_config if smtp_config else None,
+                    )
+
+                # 結果表示
+                gh = result.get("github")
+                em = result.get("email")
+
+                if gh and gh.get("success"):
+                    st.success(f"GitHub Issueを作成しました: [#{gh['number']}]({gh['url']})")
+                elif gh and not gh.get("success"):
+                    st.warning(f"GitHub Issue作成に失敗: {gh.get('error', '不明')}")
+
+                if em and em.get("success"):
+                    st.success("メール通知を送信しました。")
+                elif em and not em.get("success"):
+                    st.warning(f"メール送信に失敗: {em.get('error', '不明')}")
+
+                if (gh and gh.get("success")) or (em and em.get("success")):
+                    st.balloons()
+                    st.info("フィードバックありがとうございます！")
 
 
 # フッター
