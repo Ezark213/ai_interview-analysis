@@ -149,11 +149,76 @@ with st.sidebar:
 
 
 # ===== メインエリア: 4タブ構造 =====
-tab_single, tab_batch, tab_settings, tab_feedback = st.tabs(["単一動画解析", "バッチ処理", "設定", "フィードバック"])
+tab_single, tab_batch, tab_knowledge, tab_settings, tab_feedback = st.tabs(["単一動画解析", "バッチ処理", "ナレッジベース", "設定", "フィードバック"])
 
 
 # ==========================================
-# タブ3: 設定
+# タブ3: ナレッジベース
+# ==========================================
+with tab_knowledge:
+    st.header("ナレッジベース")
+    st.markdown("AIの評価基準と参考資料を管理します。")
+
+    # --- 評価基準 ---
+    st.subheader("評価基準（AIプロンプトに投入）")
+    st.info("SES面談向け評価基準が自動的に適用されます（客先常駐適応力・早期離職リスク等を重視）")
+
+    with st.expander("評価基準の内容を確認"):
+        try:
+            criteria_text = load_preset("ses_interview")
+            st.markdown(criteria_text)
+        except Exception as e:
+            st.error(f"評価基準の読み込みに失敗: {e}")
+
+    st.divider()
+
+    # --- 参考資料 ---
+    st.subheader("参考資料（人間閲覧用）")
+    st.caption("理論的背景や学術的根拠などの参考資料です。AIプロンプトには投入されません。")
+
+    ref_docs = load_reference_docs()
+    if ref_docs:
+        for doc in ref_docs:
+            with st.expander(f"{doc['filename']}"):
+                st.markdown(doc["content"])
+    else:
+        st.info("参考資料はまだ登録されていません。")
+
+    # 参考資料アップロード
+    uploaded_ref = st.file_uploader(
+        "参考資料をアップロード（Markdownファイル）",
+        type=["md"],
+        help="Markdown形式のファイルを参考資料として追加します",
+        key="ref_upload",
+    )
+    if uploaded_ref is not None:
+        ref_content = uploaded_ref.read().decode("utf-8")
+        if st.button("参考資料を保存", key="save_ref"):
+            try:
+                saved_path = save_reference_doc(uploaded_ref.name, ref_content)
+                st.success(f"参考資料を保存しました: {uploaded_ref.name}")
+                st.rerun()
+            except ValueError as e:
+                st.error(str(e))
+
+    st.divider()
+
+    # --- 評価のポイント ---
+    st.subheader("評価のポイント（6カテゴリ）")
+    st.markdown("""
+| カテゴリ | 概要 |
+|---------|------|
+| コミュニケーション | 言語的明瞭さ、傾聴力、構造化された説明 |
+| ストレス耐性 | 困難な質問への対応、感情制御、回復力 |
+| 信頼性 | エピソードの具体性、一貫性、検証可能性 |
+| チームワーク | 協働経験、対人関係、貢献姿勢 |
+| 信頼度 | CBCA/RM/VAベースの発言内容信頼性 |
+| 職業的態度 | 敬語、マナー、報連相、貢献志向 |
+""")
+
+
+# ==========================================
+# タブ4: 設定
 # ==========================================
 with tab_settings:
     st.header("設定")
@@ -252,50 +317,6 @@ with tab_settings:
 
     st.divider()
 
-    # --- 評価基準 ---
-    st.subheader("評価基準")
-    st.info("SES面談向け評価基準が自動的に適用されます（客先常駐適応力・早期離職リスク等を重視）")
-
-    with st.expander("評価基準の内容を確認"):
-        try:
-            criteria_text = load_preset("ses_interview")
-            st.markdown(criteria_text)
-        except Exception as e:
-            st.error(f"評価基準の読み込みに失敗: {e}")
-
-    st.divider()
-
-    # --- 参考資料 ---
-    st.subheader("参考資料")
-    st.caption("理論的背景や学術的根拠などの参考資料です。AIプロンプトには投入されません。")
-
-    ref_docs = load_reference_docs()
-    if ref_docs:
-        for doc in ref_docs:
-            with st.expander(f"{doc['filename']}"):
-                st.markdown(doc["content"])
-    else:
-        st.info("参考資料はまだ登録されていません。")
-
-    # 参考資料アップロード
-    uploaded_ref = st.file_uploader(
-        "参考資料をアップロード（Markdownファイル）",
-        type=["md"],
-        help="Markdown形式のファイルを参考資料として追加します",
-        key="ref_upload",
-    )
-    if uploaded_ref is not None:
-        ref_content = uploaded_ref.read().decode("utf-8")
-        if st.button("参考資料を保存", key="save_ref"):
-            try:
-                saved_path = save_reference_doc(uploaded_ref.name, ref_content)
-                st.success(f"参考資料を保存しました: {uploaded_ref.name}")
-                st.rerun()
-            except ValueError as e:
-                st.error(str(e))
-
-    st.divider()
-
     # --- 使用ガイド ---
     with st.expander("使用ガイド"):
         st.markdown("""
@@ -304,14 +325,6 @@ with tab_settings:
         - **形式**: MP4（H.264エンコード）
         - **解像度**: 720p以上
         - **音質**: クリアな音声
-
-        ### 評価のポイント（6カテゴリ）
-        1. **コミュニケーション**: 言語的明瞭さ、傾聴力
-        2. **ストレス耐性**: 困難な質問への対応
-        3. **信頼性**: エピソードの具体性・一貫性
-        4. **チームワーク**: 協働経験・対人関係
-        5. **信頼度**: 発言内容の信頼性（CBCA/RM/VA）
-        6. **職業的態度**: 敬語・マナー・貢献志向
 
         ### 注意事項
         - 候補者の同意を必ず取得してください
@@ -925,7 +938,7 @@ with tab_batch:
 
 
 # ==========================================
-# タブ4: フィードバック
+# タブ5: フィードバック
 # ==========================================
 with tab_feedback:
     st.header("フィードバック")
