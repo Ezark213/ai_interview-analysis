@@ -57,12 +57,19 @@ ai_interview-analysis/
 │   ├── ethics-compliance.md          # 倫理・コンプライアンス
 │   └── system-architecture.md        # システム構成
 ├── src/                               # ソースコード
+│   ├── app.py                        # Streamlit Web UI（メインエントリーポイント）
+│   ├── streamlit_app.py              # Streamlit Web UI（旧版）
 │   ├── analyzer.py                   # 動画解析CLIエントリーポイント
+│   ├── chunked_analyzer.py           # チャンク分割解析
+│   ├── chunk_integrator.py           # チャンク結果統合
+│   ├── video_chunker.py              # 動画分割（ffmpeg）
+│   ├── whisper_transcriber.py        # Whisper文字起こし
+│   ├── batch_processor.py            # バッチ処理
+│   ├── cache_manager.py              # キャッシュ管理
+│   ├── config.py                     # 設定管理
 │   ├── knowledge_loader.py           # ナレッジベース読み込み
 │   ├── prompt_builder.py             # プロンプト構築
-│   ├── response_parser.py            # レスポンス解析
-│   └── prompts/
-│       └── system.txt                # システムプロンプトテンプレート
+│   └── response_parser.py            # レスポンス解析
 ├── knowledge-base/                    # 評価基準ナレッジ
 │   └── core-criteria.md              # 行動心理学の評価基準
 └── tests/                             # テストコード（pytest）
