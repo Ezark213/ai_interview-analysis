@@ -57,13 +57,13 @@ class BatchProcessor:
             )
 
         results = []
-        analyzer = self.analyzer_factory()
 
         for i, (path, name) in enumerate(zip(video_paths, video_names)):
             if self.log_callback:
                 self.log_callback(f"Processing {i+1}/{len(video_paths)}: {name}")
 
             try:
+                analyzer = self.analyzer_factory()
                 raw_result = analyzer.analyze(path, **analyze_kwargs)
                 result = dict(raw_result)  # 元の辞書を変更しないようコピー
                 result["filename"] = name

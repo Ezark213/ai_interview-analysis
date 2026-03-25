@@ -7,6 +7,7 @@ from typing import List
 # プロジェクトルート
 _PROJECT_ROOT = Path(__file__).parent.parent
 _PRESETS_DIR = _PROJECT_ROOT / "knowledge-base" / "presets"
+_REFERENCE_DIR = _PROJECT_ROOT / "knowledge-base" / "reference"
 
 # プリセット定義
 _PRESET_REGISTRY = [
@@ -14,16 +15,6 @@ _PRESET_REGISTRY = [
         "id": "ses_interview",
         "name": "SES面談",
         "description": "SES業界のエンジニア面談向け。客先常駐適応力・早期離職リスクなどを重視",
-    },
-    {
-        "id": "general_hiring",
-        "name": "一般採用",
-        "description": "一般企業の採用面接向け。志望動機・組織フィット・成長意欲を重視",
-    },
-    {
-        "id": "technical_interview",
-        "name": "技術面接",
-        "description": "技術面接向け。技術的説明力・問題解決アプローチ・虚偽リスクを重視",
     },
 ]
 
@@ -106,6 +97,62 @@ def load_combined_knowledge(preset_id: str = None, custom_content: str = None) -
 
     # 両方Noneの場合はデフォルト（既存のcore-criteria.md）
     return load_knowledge_base()
+
+
+def load_reference_docs() -> list:
+    """
+    reference/ 内のMarkdownファイル一覧と内容を返す（UI一覧表示用）
+
+    Returns:
+        list[dict]: 各ドキュメントの情報
+            - filename: ファイル名
+            - path: フルパス
+            - content: ファイル内容
+    """
+    if not _REFERENCE_DIR.exists():
+        return []
+
+    docs = []
+    for md_file in sorted(_REFERENCE_DIR.glob("*.md")):
+        try:
+            with open(md_file, "r", encoding="utf-8") as f:
+                content = f.read()
+            docs.append({
+                "filename": md_file.name,
+                "path": str(md_file),
+                "content": content,
+            })
+        except Exception:
+            continue
+
+    return docs
+
+
+def save_reference_doc(filename: str, content: str) -> str:
+    """
+    参考資料をreference/ディレクトリに保存する
+
+    Args:
+        filename: 保存するファイル名（.md拡張子）
+        content: Markdownテキスト
+
+    Returns:
+        str: 保存先のパス
+
+    Raises:
+        ValueError: ファイル名またはコンテンツが不正な場合
+    """
+    if not filename or not filename.endswith(".md"):
+        raise ValueError("ファイル名は.md拡張子である必要があります")
+    if not content or not content.strip():
+        raise ValueError("コンテンツが空です")
+
+    _REFERENCE_DIR.mkdir(parents=True, exist_ok=True)
+    save_path = _REFERENCE_DIR / filename
+    with open(save_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return str(save_path)
 
 
 def load_knowledge_base(knowledge_dir: str = None) -> str:

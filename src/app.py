@@ -129,19 +129,6 @@ with st.sidebar:
         help="gemini-2.5-flashが推奨（低コスト・高速）"
     )
 
-    use_chunking = st.checkbox(
-        "長時間動画のチャンク解析を使用",
-        value=True,
-        help="動画の長さに応じて自動的に分割数を決定します（15分以下: 分割なし、15-30分: 2分割、30-60分: 3分割、60-90分: 4分割、90分超: 5分割）"
-    )
-
-    if use_chunking:
-        use_parallel = st.checkbox(
-            "並列処理を使用",
-            value=False,
-            help="複数チャンクを同時に解析して処理時間を短縮します（ファイルアクセスエラーが発生する場合はOFFにしてください）"
-        )
-
     st.divider()
 
     # コンパクトステータス表示
@@ -150,13 +137,7 @@ with st.sidebar:
     openai_status = "設定済み" if openai_key else "未設定"
     whisper_status = "ON" if st.session_state.get("use_whisper", False) else "OFF"
 
-    from src.knowledge_loader import list_presets, load_combined_knowledge
-    preset_id = st.session_state.get("selected_preset")
-    if preset_id:
-        presets = list_presets()
-        preset_name = next((p["name"] for p in presets if p["id"] == preset_id), "デフォルト")
-    else:
-        preset_name = "デフォルト"
+    from src.knowledge_loader import load_combined_knowledge, load_reference_docs, save_reference_doc, load_preset
 
     st.markdown(f"""
 | 項目 | 状態 |
@@ -164,7 +145,7 @@ with st.sidebar:
 | Gemini API | {'✅ ' + gemini_status if api_key_1 else '❌ ' + gemini_status} |
 | OpenAI API | {'✅ ' + openai_status if openai_key else '➖ ' + openai_status} |
 | Whisper | {whisper_status} |
-| 評価基準 | {preset_name} |
+| 評価基準 | SES面談 |
 """)
 
 
@@ -180,6 +161,7 @@ with tab_settings:
 
     # --- API設定 ---
     st.subheader("API設定")
+    st.caption(".envファイルから自動読み込み済みです。手動入力で上書きできます。")
 
     # .env / Secrets からの読み込み状態を表示
     src_key1 = get_key_source("gemini_api_key_1")
@@ -223,7 +205,7 @@ with tab_settings:
         st.session_state["gemini_api_key_1"] = gemini_key1_input
         st.session_state["gemini_api_key_2"] = gemini_key2_input
         st.session_state["openai_api_key"] = openai_key_input
-        st.success("APIキーを保存しました（このセッション中のみ有効）")
+        st.success("APIキーを保存しました（このセッション中のみ有効）。.envの値より優先されます。")
         st.rerun()
 
     # 接続状態表示
@@ -273,47 +255,45 @@ with tab_settings:
 
     # --- 評価基準 ---
     st.subheader("評価基準")
+    st.info("SES面談向け評価基準が自動的に適用されます（客先常駐適応力・早期離職リスク等を重視）")
 
-    presets = list_presets()
-    preset_options = {"デフォルト": None}
-    for p in presets:
-        preset_options[p["name"]] = p["id"]
+    with st.expander("評価基準の内容を確認"):
+        try:
+            criteria_text = load_preset("ses_interview")
+            st.markdown(criteria_text)
+        except Exception as e:
+            st.error(f"評価基準の読み込みに失敗: {e}")
 
-    # 現在選択中のプリセットのインデックスを取得
-    current_preset = st.session_state.get("selected_preset")
-    preset_keys = list(preset_options.keys())
-    current_idx = 0
-    for i, k in enumerate(preset_keys):
-        if preset_options[k] == current_preset:
-            current_idx = i
-            break
+    st.divider()
 
-    selected_preset_name = st.selectbox(
-        "評価基準プリセット",
-        preset_keys,
-        index=current_idx,
-        help="面接の種類に合った評価基準を選択",
-        key="settings_preset_select",
-    )
-    st.session_state["selected_preset"] = preset_options[selected_preset_name]
+    # --- 参考資料 ---
+    st.subheader("参考資料")
+    st.caption("理論的背景や学術的根拠などの参考資料です。AIプロンプトには投入されません。")
 
-    # カスタムナレッジベースのアップロード
-    uploaded_kb = st.file_uploader(
-        "カスタム評価基準（.md）をアップロード（オプション）",
+    ref_docs = load_reference_docs()
+    if ref_docs:
+        for doc in ref_docs:
+            with st.expander(f"{doc['filename']}"):
+                st.markdown(doc["content"])
+    else:
+        st.info("参考資料はまだ登録されていません。")
+
+    # 参考資料アップロード
+    uploaded_ref = st.file_uploader(
+        "参考資料をアップロード（Markdownファイル）",
         type=["md"],
-        help="独自の評価基準をMarkdown形式でアップロードできます",
-        key="settings_kb_uploader",
+        help="Markdown形式のファイルを参考資料として追加します",
+        key="ref_upload",
     )
-    # アップロード即時にsession_stateに保存（タブ切り替え対策）
-    if uploaded_kb is not None:
-        content = uploaded_kb.read().decode("utf-8")
-        st.session_state["custom_knowledge"] = content
-        st.success(f"カスタム評価基準を読み込みました: {uploaded_kb.name}")
-    if st.session_state.get("custom_knowledge"):
-        st.caption("カスタム評価基準が設定されています")
-        if st.button("カスタム評価基準をクリア", key="clear_custom_kb"):
-            st.session_state["custom_knowledge"] = None
-            st.rerun()
+    if uploaded_ref is not None:
+        ref_content = uploaded_ref.read().decode("utf-8")
+        if st.button("参考資料を保存", key="save_ref"):
+            try:
+                saved_path = save_reference_doc(uploaded_ref.name, ref_content)
+                st.success(f"参考資料を保存しました: {uploaded_ref.name}")
+                st.rerun()
+            except ValueError as e:
+                st.error(str(e))
 
     st.divider()
 
@@ -358,8 +338,6 @@ with tab_single:
 
     # 設定タブから値を読み取る
     use_whisper = st.session_state.get("use_whisper", False)
-    selected_preset = st.session_state.get("selected_preset")
-    custom_content = st.session_state.get("custom_knowledge")
 
     if uploaded_file is not None:
         # 動画情報表示
@@ -404,11 +382,10 @@ with tab_single:
             if not api_key_1:
                 st.error("APIキーが設定されていません。「設定」タブからAPIキーを入力してください。")
             else:
-                # ナレッジベースの読み込み
+                # ナレッジベースの読み込み（SES面談固定）
                 try:
                     knowledge_text = load_combined_knowledge(
-                        preset_id=selected_preset,
-                        custom_content=custom_content
+                        preset_id="ses_interview"
                     )
                 except (ValueError, FileNotFoundError) as e:
                     st.error(f"ナレッジベースの読み込みに失敗: {e}")
@@ -424,7 +401,7 @@ with tab_single:
                     duration_seconds = 1800
 
                 chunk_strategy = calculate_chunk_strategy(duration_seconds)
-                use_chunk_analysis = use_chunking and chunk_strategy["should_chunk"]
+                use_chunk_analysis = chunk_strategy["should_chunk"]
 
                 duration_min = duration_seconds // 60
                 if not chunk_strategy["should_chunk"]:
@@ -489,7 +466,7 @@ with tab_single:
 
                             try:
                                 chunk_results = analyzer.analyze_chunks(
-                                    chunks, parallel=use_parallel,
+                                    chunks, parallel=False,
                                     full_transcript=transcript_result,
                                     knowledge_text=knowledge_text
                                 )
@@ -679,18 +656,37 @@ with tab_single:
 
                                     st.divider()
 
-                        # JSON出力
-                        with st.expander("JSON出力"):
-                            st.json(result)
+                        # レポート出力
+                        st.header("レポート出力")
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        col_dl1, col_dl2 = st.columns(2)
+                        with col_dl1:
+                            from src.report_generator import generate_html_report
+                            html_report = generate_html_report(
+                                result,
+                                filename=uploaded_file.name,
+                                analysis_date=datetime.now().strftime("%Y年%m月%d日 %H:%M"),
+                            )
+                            st.download_button(
+                                label="HTMLレポートをダウンロード",
+                                data=html_report.encode("utf-8"),
+                                file_name=f"analysis_report_{timestamp}.html",
+                                mime="text/html",
+                                key="single_html_download",
+                            )
+                        with col_dl2:
                             json_str = json.dumps(result, ensure_ascii=False, indent=2)
                             st.download_button(
                                 label="JSONをダウンロード",
                                 data=json_str,
                                 file_name=f"analysis_result_{timestamp}.json",
-                                mime="application/json"
+                                mime="application/json",
+                                key="single_json_download",
                             )
+
+                        with st.expander("JSON出力"):
+                            st.json(result)
 
                     except Exception as e:
                         st.error(f"エラーが発生しました: {str(e)}")
@@ -716,10 +712,6 @@ with tab_batch:
     st.header("バッチ処理")
     st.info("最大10件の動画を一括で解析します。API制限への対応として、動画間に30秒の待機を設けています。")
 
-    # 設定タブから値を読み取る
-    selected_preset = st.session_state.get("selected_preset")
-    custom_content = st.session_state.get("custom_knowledge")
-
     uploaded_files = st.file_uploader(
         "動画ファイルを選択（複数可）",
         type=["mp4", "mov", "avi", "webm"],
@@ -740,11 +732,10 @@ with tab_batch:
                 if not api_key_1:
                     st.error("APIキーが設定されていません。")
                 else:
-                    # ナレッジベース読み込み
+                    # ナレッジベース読み込み（SES面談固定）
                     try:
                         knowledge_text = load_combined_knowledge(
-                            preset_id=selected_preset,
-                            custom_content=custom_content
+                            preset_id="ses_interview"
                         )
                     except (ValueError, FileNotFoundError) as e:
                         st.error(f"ナレッジベースの読み込みに失敗: {e}")
@@ -782,8 +773,15 @@ with tab_batch:
                         log_messages.append(msg)
                         log_text.text("\n".join(log_messages[-50:]))
 
+                    # APIキーローテーション: 複数キーを交互に使用
+                    api_keys = [k for k in [api_key_1, api_key_2] if k]
+                    _key_counter = [0]  # mutableでクロージャ内からインクリメント可能に
+
                     def make_analyzer():
-                        return VideoAnalyzer(api_key=api_key_1, model=model, log_callback=batch_log_callback)
+                        key = api_keys[_key_counter[0] % len(api_keys)]
+                        _key_counter[0] += 1
+                        batch_log_callback(f"[APIキー] キー{(_key_counter[0] - 1) % len(api_keys) + 1}/{len(api_keys)}を使用")
+                        return VideoAnalyzer(api_key=key, model=model, log_callback=batch_log_callback)
 
                     processor = BatchProcessor(
                         analyzer_factory=make_analyzer,
@@ -863,7 +861,7 @@ with tab_batch:
         # BatchProcessorインスタンスが必要（エクスポート用）
         export_processor = BatchProcessor(analyzer_factory=lambda: None)
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             csv_data = export_processor.export_to_csv(results)
             st.download_button(
@@ -881,6 +879,32 @@ with tab_batch:
                 "batch_results.json",
                 "application/json",
                 key="batch_json_download"
+            )
+        with col3:
+            # HTML個別レポート（ZIP）
+            import zipfile
+            from src.report_generator import generate_html_report
+
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+                for r in results:
+                    if r.get("status") != "success":
+                        continue
+                    fname = r.get("filename", "unknown")
+                    safe_name = fname.rsplit(".", 1)[0] if "." in fname else fname
+                    html_content = generate_html_report(
+                        r,
+                        filename=fname,
+                        analysis_date=datetime.now().strftime("%Y年%m月%d日 %H:%M"),
+                    )
+                    zf.writestr(f"{safe_name}_report.html", html_content.encode("utf-8"))
+            zip_buffer.seek(0)
+            st.download_button(
+                "HTMLレポート（ZIP）",
+                zip_buffer.getvalue(),
+                "batch_html_reports.zip",
+                "application/zip",
+                key="batch_html_download"
             )
 
         # 各動画の詳細（折りたたみ）
@@ -905,7 +929,7 @@ with tab_batch:
 st.divider()
 st.markdown("""
 <div class="footer-text">
-    AI面談動画解析システム v1.0<br>
+    AI面談動画解析システム v1.1<br>
     本システムの評価結果は参考情報です。最終的な判断は必ず人間が行ってください。<br>
     Powered by Google Gemini API
 </div>
