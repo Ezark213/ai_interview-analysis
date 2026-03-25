@@ -119,33 +119,12 @@ st.markdown("面談動画の行動心理学的リスク評価を実施します"
 from src.config import load_api_keys, get_key_source
 api_key_1, api_key_2, openai_key = load_api_keys()
 
-# === サイドバー（スリム化: 実行時設定 + コンパクトステータス） ===
-with st.sidebar:
-    st.header("解析設定")
+from src.knowledge_loader import load_combined_knowledge, load_reference_docs, save_reference_doc, load_preset
 
-    model = st.selectbox(
-        "使用モデル",
-        ["gemini-2.5-flash", "gemini-1.5-pro"],
-        help="gemini-2.5-flashが推奨（低コスト・高速）"
-    )
-
-    st.divider()
-
-    # コンパクトステータス表示
-    st.subheader("ステータス")
-    gemini_status = "設定済み" if api_key_1 else "未設定"
-    openai_status = "設定済み" if openai_key else "未設定"
-    whisper_status = "ON" if st.session_state.get("use_whisper", False) else "OFF"
-
-    from src.knowledge_loader import load_combined_knowledge, load_reference_docs, save_reference_doc, load_preset
-
-    st.markdown(f"""
-| 項目 | 状態 |
-|------|------|
-| Gemini API | {'✅ ' + gemini_status if api_key_1 else '❌ ' + gemini_status} |
-| OpenAI API | {'✅ ' + openai_status if openai_key else '➖ ' + openai_status} |
-| Whisper | {whisper_status} |
-""")
+# モデル選択（session_stateで管理、設定タブで変更可能）
+if "model" not in st.session_state:
+    st.session_state["model"] = "gemini-2.5-flash"
+model = st.session_state["model"]
 
 
 # ===== メインエリア: 4タブ構造 =====
@@ -222,6 +201,21 @@ with tab_knowledge:
 # ==========================================
 with tab_settings:
     st.header("設定")
+
+    # --- モデル選択 ---
+    st.subheader("使用モデル")
+    selected_model = st.selectbox(
+        "解析に使用するモデル",
+        ["gemini-2.5-flash", "gemini-1.5-pro"],
+        index=0 if st.session_state.get("model") == "gemini-2.5-flash" else 1,
+        help="gemini-2.5-flashが推奨（低コスト・高速）",
+        key="settings_model",
+    )
+    if selected_model != st.session_state.get("model"):
+        st.session_state["model"] = selected_model
+        model = selected_model
+
+    st.divider()
 
     # --- API設定 ---
     st.subheader("API設定")
