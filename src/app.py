@@ -29,6 +29,9 @@ import json
 import pandas as pd
 from datetime import datetime
 
+# UIコンポーネントのインポート
+from src.components.styles import inject_custom_css
+
 # ページ設定
 st.set_page_config(
     page_title="AI面談動画解析システム",
@@ -36,80 +39,18 @@ st.set_page_config(
     layout="wide"
 )
 
-# カスタムCSS注入
-st.markdown("""
-<style>
-    /* メインコンテンツの余白調整 */
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
+# カスタムCSS注入（企業向けSaaS風デザイン）
+custom_css = inject_custom_css()
 
-    /* ヘッダーのフォント調整 */
-    h1 {
-        color: #1B3A5C;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-    h2 {
-        color: #1E293B;
-        font-weight: 600;
-        border-bottom: 2px solid #E2E8F0;
-        padding-bottom: 0.5rem;
-        margin-top: 1.5rem;
-    }
+# Try both methods for maximum compatibility
+st.markdown(custom_css, unsafe_allow_html=True)
 
-    /* サイドバーのスタイル */
-    [data-testid="stSidebar"] {
-        background-color: #F8FAFC;
-    }
-    [data-testid="stSidebar"] h1,
-    [data-testid="stSidebar"] h2 {
-        border-bottom: none;
-    }
-
-    /* メトリクスカードのスタイル */
-    [data-testid="stMetric"] {
-        background-color: #F8FAFC;
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-        padding: 1rem;
-    }
-
-    /* ボタンのスタイル */
-    .stButton > button[kind="primary"] {
-        background-color: #1B3A5C;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-    }
-    .stButton > button[kind="primary"]:hover {
-        background-color: #264D73;
-    }
-
-    /* タブのスタイル */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2rem;
-    }
-    .stTabs [data-baseweb="tab"] {
-        font-weight: 600;
-    }
-
-    /* テーブルのスタイル */
-    .stDataFrame {
-        border: 1px solid #E2E8F0;
-        border-radius: 8px;
-    }
-
-    /* フッターのスタイル */
-    .footer-text {
-        color: #94A3B8;
-        font-size: 0.85rem;
-        text-align: center;
-        padding: 1rem 0;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Also try using components.html if available
+try:
+    import streamlit.components.v1 as components
+    components.html(custom_css, height=0)
+except:
+    pass
 
 # タイトル
 st.title("AI面談動画解析システム")
