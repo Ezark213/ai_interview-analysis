@@ -9,6 +9,9 @@ pytest-mock>=3.14.0
 
 # UI
 streamlit>=1.32.0
+plotly>=5.18.0
+kaleido>=0.2.1
+streamlit-plotly-events>=0.0.6
 
 # PoC Analysis (Iteration-05)
 scipy>=1.11.0

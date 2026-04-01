@@ -24,7 +24,6 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 import streamlit as st
-from streamlit_option_menu import option_menu
 import os
 import json
 import pandas as pd
@@ -50,9 +49,8 @@ from src.components.cards import (
 # ページ設定
 st.set_page_config(
     page_title="AI面談動画解析システム",
-    page_icon=None,  # 絵文字削除
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_icon="AI",
+    layout="wide"
 )
 
 # カスタムCSS注入（企業向けSaaS風デザイン）
@@ -68,18 +66,9 @@ try:
 except:
     pass
 
-# ヘッダー（Spotify/Portfolio Wise風）
-st.markdown("""
-<div class="modern-header">
-    <div class="modern-header-left">
-        <div class="modern-header-logo">AI面談動画解析</div>
-        <div class="modern-header-version">v2.0</div>
-    </div>
-    <div class="modern-header-right">
-        <div class="modern-header-powered">Powered by Gemini AI</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# タイトル
+st.title("AI面談動画解析システム")
+st.markdown("面談動画の行動心理学的リスク評価を実施します")
 
 # === APIキー読み込み ===
 from src.config import load_api_keys, get_key_source
@@ -93,45 +82,14 @@ if "model" not in st.session_state:
 model = st.session_state["model"]
 
 
-# ===== メインエリア: option-menuナビゲーション =====
-selected = option_menu(
-    menu_title=None,
-    options=["単一動画解析", "バッチ処理", "ナレッジベース", "使い方", "設定", "フィードバック"],
-    icons=None,  # アイコンなし（絵文字除外）
-    menu_icon=None,
-    default_index=0,
-    orientation="horizontal",
-    styles={
-        "container": {
-            "padding": "0!important",
-            "background-color": "#FFFFFF",
-            "margin": "0 0 1rem 0",
-        },
-        "nav-link": {
-            "font-size": "0.9rem",
-            "font-weight": "500",
-            "color": "#64748B",
-            "text-align": "center",
-            "padding": "0.75rem 1.25rem",
-            "margin": "0",
-            "background-color": "transparent",
-            "border-bottom": "3px solid transparent",
-            "transition": "all 0.2s ease",
-        },
-        "nav-link-selected": {
-            "background-color": "#EFF6FF",
-            "color": "#1B2559",
-            "font-weight": "600",
-            "border-bottom": "3px solid #1B2559",
-        },
-    }
-)
+# ===== メインエリア: 4タブ構造 =====
+tab_single, tab_batch, tab_knowledge, tab_guide, tab_settings, tab_feedback = st.tabs(["単一動画解析", "バッチ処理", "ナレッジベース", "使い方", "設定", "フィードバック"])
 
 
 # ==========================================
-# ナレッジベースページ
+# タブ3: ナレッジベース
 # ==========================================
-if selected == "ナレッジベース":
+with tab_knowledge:
     st.header("ナレッジベース")
     st.markdown("AIの評価基準と参考資料を管理します。")
 
@@ -194,9 +152,9 @@ if selected == "ナレッジベース":
 
 
 # ==========================================
-# 設定ページ
+# タブ4: 設定
 # ==========================================
-if selected == "設定":
+with tab_settings:
     st.header("設定")
 
     # --- モデル選択 ---
@@ -309,9 +267,9 @@ if selected == "設定":
 
 
 # ==========================================
-# 使い方ページ
+# タブ4: 使い方
 # ==========================================
-if selected == "使い方":
+with tab_guide:
     st.header("使い方ガイド")
 
     st.subheader("推奨される動画")
@@ -357,19 +315,19 @@ if selected == "使い方":
 
 
 # ==========================================
-# 単一動画解析ページ
+# タブ1: 単一動画解析（既存機能）
 # ==========================================
-if selected == "単一動画解析":
-    st.subheader("動画アップロード")
+with tab_single:
+    # APIキー未設定時のバナー
+    if not api_key_1:
+        st.warning("APIキーが設定されていません。「設定」タブからAPIキーを入力してください。")
 
-    # アップロードエリア（目立たせる）
-    with st.container():
-        uploaded_file = st.file_uploader(
-            "動画ファイルを選択してください",
-            type=["mp4", "mov", "avi", "webm"],
-            help="対応形式: MP4, MOV, AVI, WebM | 推奨: 30分以内 | 最大: 200MB",
-            key="single_uploader"
-        )
+    uploaded_file = st.file_uploader(
+        "動画ファイルを選択",
+        type=["mp4", "mov", "avi", "webm"],
+        help="対応形式: MP4, MOV, AVI, WebM（推奨: 30分以内）",
+        key="single_uploader"
+    )
 
     # 設定タブから値を読み取る
     use_whisper = st.session_state.get("use_whisper", False)
@@ -766,9 +724,9 @@ if selected == "単一動画解析":
 
 
 # ==========================================
-# バッチ処理ページ
+# タブ2: バッチ処理（IT-11新規）
 # ==========================================
-if selected == "バッチ処理":
+with tab_batch:
     # APIキー未設定時のバナー
     if not api_key_1:
         st.warning("APIキーが設定されていません。「設定」タブからAPIキーを入力してください。")
@@ -1009,9 +967,9 @@ if selected == "バッチ処理":
 
 
 # ==========================================
-# フィードバックページ
+# タブ5: フィードバック
 # ==========================================
-if selected == "フィードバック":
+with tab_feedback:
     st.header("フィードバック")
     st.markdown("ご意見・ご要望・バグ報告をお送りください。GitHub Issueとして管理され、メールでも通知されます。")
 
@@ -1094,10 +1052,10 @@ if selected == "フィードバック":
 
 # フッター
 st.divider()
-col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
-with col_f1:
-    st.caption("AI面談動画解析システム v2.0")
-with col_f2:
-    st.caption("Powered by Gemini AI • Built with Streamlit")
-with col_f3:
-    st.caption("© 2026")
+st.markdown("""
+<div class="footer-text">
+    AI面談動画解析システム v1.1<br>
+    本システムの評価結果は参考情報です。最終的な判断は必ず人間が行ってください。<br>
+    Powered by Google Gemini API
+</div>
+""", unsafe_allow_html=True)

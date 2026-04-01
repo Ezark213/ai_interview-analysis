@@ -1,0 +1,509 @@
+{
+  "started_at": "2026-03-30T13:44:06.904640",
+  "sites": [
+    {
+      "site_id": "01_huggingface",
+      "site_name": "Hugging Face",
+      "url": "https://huggingface.co/",
+      "status": "success",
+      "screenshots": [
+        {
+          "filename": "01_huggingface_desktop_main.png",
+          "url": "https://huggingface.co/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "01_huggingface_desktop_page1.png",
+          "url": "https://huggingface.co/models",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "01_huggingface_desktop_page2.png",
+          "url": "https://huggingface.co/spaces",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "01_huggingface_tablet_main.png",
+          "url": "https://huggingface.co/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "01_huggingface_tablet_page1.png",
+          "url": "https://huggingface.co/models",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "01_huggingface_tablet_page2.png",
+          "url": "https://huggingface.co/spaces",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "01_huggingface_mobile_main.png",
+          "url": "https://huggingface.co/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "01_huggingface_mobile_page1.png",
+          "url": "https://huggingface.co/models",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "01_huggingface_mobile_page2.png",
+          "url": "https://huggingface.co/spaces",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "site_id": "02_wandb",
+      "site_name": "Weights & Biases",
+      "url": "https://wandb.ai/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "02_wandb_tablet_main.png",
+          "url": "https://wandb.ai/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "02_wandb_mobile_main.png",
+          "url": "https://wandb.ai/",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://wandb.ai/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://wandb.ai/site\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://wandb.ai/site\", waiting until \"networkidle\"\n",
+        "mobile/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://wandb.ai/site\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "03_comet",
+      "site_name": "Comet ML",
+      "url": "https://www.comet.com/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "04_neptune",
+      "site_name": "Neptune.ai",
+      "url": "https://neptune.ai/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://neptune.ai/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://neptune.ai/product\", waiting until \"networkidle\"\n",
+        "tablet/main: Page.goto: net::ERR_CONNECTION_CLOSED at https://neptune.ai/\nCall log:\n  - navigating to \"https://neptune.ai/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://neptune.ai/product\", waiting until \"networkidle\"\n",
+        "mobile/main: Page.goto: net::ERR_CONNECTION_CLOSED at https://neptune.ai/\nCall log:\n  - navigating to \"https://neptune.ai/\", waiting until \"networkidle\"\n",
+        "mobile/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://neptune.ai/product\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "05_datadog",
+      "site_name": "Datadog AI",
+      "url": "https://www.datadoghq.com/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "05_datadog_mobile_main.png",
+          "url": "https://www.datadoghq.com/",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.datadoghq.com/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.datadoghq.com/product/\", waiting until \"networkidle\"\n",
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.datadoghq.com/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.datadoghq.com/product/\", waiting until \"networkidle\"\n",
+        "mobile/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.datadoghq.com/product/\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "06_tableau",
+      "site_name": "Tableau Cloud",
+      "url": "https://www.tableau.com/products/cloud",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "07_looker",
+      "site_name": "Looker",
+      "url": "https://cloud.google.com/looker",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "08_metabase",
+      "site_name": "Metabase",
+      "url": "https://www.metabase.com/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.metabase.com/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.metabase.com/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.metabase.com/\", waiting until \"networkidle\"\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "09_amplitude",
+      "site_name": "Amplitude",
+      "url": "https://amplitude.com/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "09_amplitude_desktop_page1.png",
+          "url": "https://amplitude.com/platform",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "09_amplitude_tablet_page1.png",
+          "url": "https://amplitude.com/platform",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "09_amplitude_mobile_main.png",
+          "url": "https://amplitude.com/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "09_amplitude_mobile_page1.png",
+          "url": "https://amplitude.com/platform",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://amplitude.com/\", waiting until \"networkidle\"\n",
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://amplitude.com/\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "10_mixpanel",
+      "site_name": "Mixpanel",
+      "url": "https://mixpanel.com/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://mixpanel.com/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "11_lever",
+      "site_name": "Lever",
+      "url": "https://www.lever.co/",
+      "status": "success",
+      "screenshots": [
+        {
+          "filename": "11_lever_desktop_main.png",
+          "url": "https://www.lever.co/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "11_lever_desktop_page1.png",
+          "url": "https://www.lever.co/product",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "11_lever_tablet_main.png",
+          "url": "https://www.lever.co/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "11_lever_tablet_page1.png",
+          "url": "https://www.lever.co/product",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "11_lever_mobile_main.png",
+          "url": "https://www.lever.co/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "11_lever_mobile_page1.png",
+          "url": "https://www.lever.co/product",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "site_id": "12_greenhouse",
+      "site_name": "Greenhouse",
+      "url": "https://www.greenhouse.com/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "12_greenhouse_desktop_main.png",
+          "url": "https://www.greenhouse.com/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "12_greenhouse_desktop_page1.png",
+          "url": "https://www.greenhouse.com/product",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "12_greenhouse_tablet_page1.png",
+          "url": "https://www.greenhouse.com/product",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "12_greenhouse_mobile_main.png",
+          "url": "https://www.greenhouse.com/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "12_greenhouse_mobile_page1.png",
+          "url": "https://www.greenhouse.com/product",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.greenhouse.com/\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "13_hirevue",
+      "site_name": "HireVue",
+      "url": "https://www.hirevue.com/",
+      "status": "success",
+      "screenshots": [
+        {
+          "filename": "13_hirevue_desktop_main.png",
+          "url": "https://www.hirevue.com/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "13_hirevue_desktop_page1.png",
+          "url": "https://www.hirevue.com/products",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "13_hirevue_tablet_main.png",
+          "url": "https://www.hirevue.com/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "13_hirevue_tablet_page1.png",
+          "url": "https://www.hirevue.com/products",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "13_hirevue_mobile_main.png",
+          "url": "https://www.hirevue.com/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "13_hirevue_mobile_page1.png",
+          "url": "https://www.hirevue.com/products",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "site_id": "14_pymetrics",
+      "site_name": "Pymetrics",
+      "url": "https://www.pymetrics.ai/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/\nCall log:\n  - navigating to \"https://www.pymetrics.ai/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/platform\nCall log:\n  - navigating to \"https://www.pymetrics.ai/platform\", waiting until \"networkidle\"\n",
+        "tablet/main: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/\nCall log:\n  - navigating to \"https://www.pymetrics.ai/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/platform\nCall log:\n  - navigating to \"https://www.pymetrics.ai/platform\", waiting until \"networkidle\"\n",
+        "mobile/main: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/\nCall log:\n  - navigating to \"https://www.pymetrics.ai/\", waiting until \"networkidle\"\n",
+        "mobile/page1: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pymetrics.ai/platform\nCall log:\n  - navigating to \"https://www.pymetrics.ai/platform\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "15_workable",
+      "site_name": "Workable",
+      "url": "https://www.workable.com/",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.workable.com/\", waiting until \"networkidle\"\n",
+        "desktop/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.workable.com/features\", waiting until \"networkidle\"\n",
+        "tablet/main: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.workable.com/\", waiting until \"networkidle\"\n",
+        "tablet/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.workable.com/features\", waiting until \"networkidle\"\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.workable.com/features\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "16_linear",
+      "site_name": "Linear",
+      "url": "https://linear.app/",
+      "status": "success",
+      "screenshots": [
+        {
+          "filename": "16_linear_desktop_main.png",
+          "url": "https://linear.app/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "16_linear_tablet_main.png",
+          "url": "https://linear.app/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "16_linear_mobile_main.png",
+          "url": "https://linear.app/",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "site_id": "17_notion",
+      "site_name": "Notion",
+      "url": "https://www.notion.so/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "17_notion_desktop_main.png",
+          "url": "https://www.notion.so/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "17_notion_desktop_page1.png",
+          "url": "https://www.notion.so/product",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "17_notion_tablet_main.png",
+          "url": "https://www.notion.so/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "17_notion_mobile_main.png",
+          "url": "https://www.notion.so/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "17_notion_mobile_page1.png",
+          "url": "https://www.notion.so/product",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "tablet/page1: Page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://www.notion.so/product\", waiting until \"networkidle\"\n"
+      ]
+    },
+    {
+      "site_id": "18_airtable",
+      "site_name": "Airtable",
+      "url": "https://www.airtable.com/",
+      "status": "success",
+      "screenshots": [
+        {
+          "filename": "18_airtable_desktop_main.png",
+          "url": "https://www.airtable.com/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "18_airtable_desktop_page1.png",
+          "url": "https://www.airtable.com/platform",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "18_airtable_tablet_main.png",
+          "url": "https://www.airtable.com/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "18_airtable_tablet_page1.png",
+          "url": "https://www.airtable.com/platform",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "18_airtable_mobile_main.png",
+          "url": "https://www.airtable.com/",
+          "viewport": "mobile"
+        },
+        {
+          "filename": "18_airtable_mobile_page1.png",
+          "url": "https://www.airtable.com/platform",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "site_id": "19_stripe",
+      "site_name": "Stripe Dashboard",
+      "url": "https://stripe.com/",
+      "status": "partial",
+      "screenshots": [
+        {
+          "filename": "19_stripe_desktop_main.png",
+          "url": "https://stripe.com/",
+          "viewport": "desktop"
+        },
+        {
+          "filename": "19_stripe_tablet_main.png",
+          "url": "https://stripe.com/",
+          "viewport": "tablet"
+        },
+        {
+          "filename": "19_stripe_mobile_main.png",
+          "url": "https://stripe.com/",
+          "viewport": "mobile"
+        }
+      ],
+      "errors": [
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    },
+    {
+      "site_id": "20_mongodb",
+      "site_name": "MongoDB Atlas",
+      "url": "https://www.mongodb.com/atlas",
+      "status": "partial",
+      "screenshots": [],
+      "errors": [
+        "desktop/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "desktop/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "tablet/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/main: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n",
+        "mobile/page1: Page.wait_for_selector: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator(\"main\") to be visible\n"
+      ]
+    }
+  ],
+  "completed_at": "2026-03-30T15:17:21.934543"
+}

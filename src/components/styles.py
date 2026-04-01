@@ -50,6 +50,47 @@ def inject_custom_css() -> str:
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        /* サーフェスカラー（新規追加 - Notion/Linear風） */
+        --surface-primary: #FFFFFF;
+        --surface-secondary: #F8F9FA;
+        --surface-tertiary: #F1F3F5;
+        --text-heading: #1F2937;
+        --text-body: #6B7280;
+        --text-muted: #9CA3AF;
+
+        /* データビジュアライゼーション用カラーパレット（新規追加 - Tableau風） */
+        --chart-color-1: #3B82F6;  /* ブルー */
+        --chart-color-2: #10B981;  /* グリーン */
+        --chart-color-3: #F59E0B;  /* オレンジ */
+        --chart-color-4: #EF4444;  /* レッド */
+        --chart-color-5: #8B5CF6;  /* パープル */
+        --chart-color-6: #EC4899;  /* ピンク */
+
+        /* ステータスカラー（新規追加 - Datadog風） */
+        --status-success: #10B981;
+        --status-warning: #F59E0B;
+        --status-error: #EF4444;
+        --status-info: #3B82F6;
+
+        /* フォントサイズ階層（新規追加 - Linear風） */
+        --font-size-h1: 2.5rem;      /* 40px */
+        --font-size-h2: 2rem;        /* 32px */
+        --font-size-h3: 1.5rem;      /* 24px */
+        --font-size-body: 1rem;      /* 16px */
+        --font-size-small: 0.875rem; /* 14px */
+        --font-size-caption: 0.75rem; /* 12px */
+
+        /* フォントウェイト（新規追加） */
+        --font-weight-bold: 700;
+        --font-weight-semibold: 600;
+        --font-weight-medium: 500;
+        --font-weight-normal: 400;
+
+        /* 行間（新規追加） */
+        --line-height-tight: 1.25;
+        --line-height-normal: 1.5;
+        --line-height-relaxed: 1.75;
     }
 
     /* ========== グローバルスタイル（強化版）========== */
@@ -188,76 +229,171 @@ def inject_custom_css() -> str:
         margin-bottom: 0.5rem !important;
     }
 
-    /* ========== ボタンスタイル（プライマリ）========== */
+    /* ========== ボタンスタイル（高コントラスト版）========== */
+
+    /* すべてのボタンの基本スタイル - 明るいブルー背景、白文字、高コントラスト */
+    button,
     .stButton > button,
     button[kind="primary"],
-    button[data-testid="baseButton-primary"] {
-        background: linear-gradient(135deg, #4F6AF0 0%, #6C63FF 100%) !important;
+    button[kind="secondary"],
+    button[data-testid="baseButton-primary"],
+    button[data-testid="baseButton-secondary"],
+    button[data-testid="stFormSubmitButton"] {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
         color: #FFFFFF !important;
         border: none !important;
         border-radius: 8px !important;
         padding: 0.5rem 1.5rem !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
         transition: all 0.2s ease !important;
-        box-shadow: 0 2px 4px rgba(79,106,240,0.3) !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4) !important;
         cursor: pointer !important;
     }
 
+    /* ボタンのホバー状態 - さらに明るく */
+    button:hover,
     .stButton > button:hover,
     button[kind="primary"]:hover,
-    button[data-testid="baseButton-primary"]:hover {
-        background: linear-gradient(135deg, #6C63FF 0%, #8B7FFF 100%) !important;
-        box-shadow: 0 4px 12px rgba(79,106,240,0.4) !important;
-        transform: translateY(-1px) !important;
+    button[data-testid="baseButton-primary"]:hover,
+    button[data-testid="stFormSubmitButton"]:hover {
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5) !important;
+        transform: translateY(-2px) !important;
     }
 
-    /* ========== タブスタイル（シンプル＆確実版）========== */
+    /* ボタン内のテキスト要素 - 強制的に真っ白・bold */
+    button *,
+    .stButton > button *,
+    button[kind="primary"] *,
+    button[data-testid="baseButton-primary"] *,
+    button[data-testid="stFormSubmitButton"] * {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    /* フォーム送信ボタンの特別対応 - 明るいブルー、真っ白・bold */
+    button[data-testid="stFormSubmitButton"] {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    button[data-testid="stFormSubmitButton"] > div,
+    button[data-testid="stFormSubmitButton"] > div > div,
+    button[data-testid="stFormSubmitButton"] p,
+    button[data-testid="stFormSubmitButton"] span {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    /* ダウンロードボタン - 明るいグリーン */
+    button[data-testid="stDownloadButton"] {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    button[data-testid="stDownloadButton"] * {
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+    }
+
+    button[data-testid="stDownloadButton"]:hover {
+        background: linear-gradient(135deg, #34D399 0%, #10B981 100%) !important;
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5) !important;
+    }
+
+    /* セカンダリボタン - グレー */
+    button[kind="secondary"] {
+        background: #64748B !important;
+        color: #FFFFFF !important;
+        font-weight: 600 !important;
+    }
+
+    button[kind="secondary"]:hover {
+        background: #475569 !important;
+    }
+
+    /* ========== タブスタイル（モダンナビゲーションバー風）========== */
+
     /* タブコンテナ全体 */
     .stTabs {
         background-color: #FFFFFF !important;
-        border-bottom: 2px solid #E2E8F0 !important;
+        margin-bottom: 1rem !important;
     }
 
-    /* タブリスト */
+    /* タブリスト（上部固定） */
     .stTabs [role="tablist"] {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 999 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+        border-bottom: 1px solid #E2E8F0 !important;
         gap: 0 !important;
-        border-bottom: 2px solid #E2E8F0 !important;
+        padding: 0 1rem !important;
+        margin: 0 -1rem !important;
     }
 
     /* 個々のタブボタン */
     .stTabs button[role="tab"] {
         background-color: transparent !important;
         color: #64748B !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
         border: none !important;
         border-bottom: 3px solid transparent !important;
-        padding: 0.75rem 1.5rem !important;
+        padding: 0 1.25rem !important;
+        height: 55px !important;
         transition: all 0.2s ease !important;
         cursor: pointer !important;
+        letter-spacing: 0.01em !important;
     }
 
     /* タブボタンのホバー状態 */
     .stTabs button[role="tab"]:hover {
         background-color: #F8FAFC !important;
         color: #1E293B !important;
-        border-bottom-color: #94A3B8 !important;
+        border-bottom-color: #CBD5E1 !important;
     }
 
     /* 選択中のタブ */
     .stTabs button[role="tab"][aria-selected="true"] {
         background-color: #EFF6FF !important;
         color: #1B2559 !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         border-bottom: 3px solid #1B2559 !important;
     }
 
-    /* タブパネル（コンテンツエリア）- コンパクト */
+    /* タブパネル（コンテンツエリア） */
     .stTabs [role="tabpanel"] {
-        padding-top: 0.75rem !important;
+        padding-top: 1rem !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
+    }
+
+    /* レスポンシブ対応（タブレット） */
+    @media (max-width: 1024px) {
+        .stTabs button[role="tab"] {
+            font-size: 0.85rem !important;
+            padding: 0 1rem !important;
+        }
+    }
+
+    /* レスポンシブ対応（モバイル） */
+    @media (max-width: 768px) {
+        .stTabs button[role="tab"] {
+            font-size: 0.8rem !important;
+            padding: 0 0.75rem !important;
+            height: 50px !important;
+        }
+
+        .stTabs [role="tablist"] {
+            padding: 0 0.5rem !important;
+            margin: 0 -0.5rem !important;
+        }
     }
 
     /* ========== テーブルスタイル ========== */
@@ -302,6 +438,404 @@ def inject_custom_css() -> str:
         color: var(--primary-dark-navy);
         font-size: 1.875rem;
         font-weight: 700;
+    }
+
+    /* ========== グリッドシステム（新規追加）========== */
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .grid-col-4 {
+        grid-column: span 4;
+    }
+
+    .grid-col-6 {
+        grid-column: span 6;
+    }
+
+    .grid-col-8 {
+        grid-column: span 8;
+    }
+
+    .grid-col-12 {
+        grid-column: span 12;
+    }
+
+    /* ========== Plotlyチャートスタイル（新規追加）========== */
+    .js-plotly-plot {
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    /* ========== 追加のユーティリティクラス（新規追加）========== */
+    .text-center {
+        text-align: center;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .mt-1 {
+        margin-top: var(--spacing-sm);
+    }
+
+    .mt-2 {
+        margin-top: var(--spacing-md);
+    }
+
+    .mt-3 {
+        margin-top: var(--spacing-lg);
+    }
+
+    .mb-1 {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .mb-2 {
+        margin-bottom: var(--spacing-md);
+    }
+
+    .mb-3 {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    /* ========== モダンヘッダー（Spotify/Portfolio Wise風）========== */
+    .modern-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        margin: -1rem -1rem 1rem -1rem;
+        background: linear-gradient(135deg, #1B2559 0%, #2A3A7D 100%);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-bottom: none;
+    }
+
+    .modern-header-left {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+    }
+
+    .modern-header-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        letter-spacing: -0.02em;
+    }
+
+    .modern-header-version {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .modern-header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .modern-header-powered {
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 400;
+    }
+
+    /* レスポンシブ対応（モバイル） */
+    @media (max-width: 768px) {
+        .modern-header {
+            padding: 0.75rem 1rem;
+            margin: -0.5rem -0.5rem 0.75rem -0.5rem;
+        }
+
+        .modern-header-logo {
+            font-size: 1.25rem;
+        }
+
+        .modern-header-version {
+            font-size: 0.65rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .modern-header-powered {
+            font-size: 0.75rem;
+        }
+    }
+
+    /* ========== Streamlitヘッダーのスタイル調整（高コントラスト版） ========== */
+
+    /* ヘッダー全体 */
+    header[data-testid="stHeader"] {
+        background: #FFFFFF !important;
+        padding: 0.5rem 1rem !important;
+        border-bottom: 1px solid #E2E8F0 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    /* Deployボタン - 白背景、ダークテキスト、明確な境界線 */
+    button[data-testid="stAppDeployButton"],
+    button[kind="header"] {
+        background-color: #FFFFFF !important;
+        color: #1B2559 !important;
+        border: 2px solid #1B2559 !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 4px rgba(27, 37, 89, 0.2) !important;
+    }
+
+    button[data-testid="stAppDeployButton"]:hover,
+    button[kind="header"]:hover {
+        background-color: #1B2559 !important;
+        color: #FFFFFF !important;
+        border-color: #1B2559 !important;
+        box-shadow: 0 4px 12px rgba(27, 37, 89, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Deployボタン内のすべての要素 */
+    button[data-testid="stAppDeployButton"] *,
+    button[kind="header"] * {
+        color: #1B2559 !important;
+        font-weight: 600 !important;
+    }
+
+    button[data-testid="stAppDeployButton"]:hover *,
+    button[kind="header"]:hover * {
+        color: #FFFFFF !important;
+    }
+
+    /* メニューボタン（3点リーダー）- 同様のスタイル */
+    button[kind="headerNoPadding"] {
+        background-color: #FFFFFF !important;
+        color: #1B2559 !important;
+        border: 2px solid #1B2559 !important;
+        border-radius: 8px !important;
+        padding: 0.5rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 4px rgba(27, 37, 89, 0.2) !important;
+    }
+
+    button[kind="headerNoPadding"]:hover {
+        background-color: #1B2559 !important;
+        color: #FFFFFF !important;
+        border-color: #1B2559 !important;
+        box-shadow: 0 4px 12px rgba(27, 37, 89, 0.3) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* メニューボタンのアイコン（SVG） */
+    button[kind="headerNoPadding"] svg,
+    button[kind="headerNoPadding"] path {
+        fill: #1B2559 !important;
+        color: #1B2559 !important;
+        stroke: #1B2559 !important;
+    }
+
+    button[kind="headerNoPadding"]:hover svg,
+    button[kind="headerNoPadding"]:hover path {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+    }
+
+    /* ========== 全体の余白削減（完全版） ========== */
+
+    /* ページ全体の上部余白を完全に0に */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Streamlitアプリ全体の余白を削除 */
+    .stApp {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* AppViewContainerの余白を削除 */
+    [data-testid="stAppViewContainer"],
+    .appview-container,
+    div.appview-container {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* メインコンテンツエリアを上に詰める */
+    .main,
+    section.main,
+    [data-testid="stMain"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* メインコンテンツの最初の子要素の余白削除 */
+    .main > div:first-child,
+    section.main > div:first-child {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* ブロックコンテナの上部余白削減 */
+    .block-container,
+    [data-testid="block-container"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* ヘッダー直下の余白削減 */
+    header[data-testid="stHeader"] + div,
+    header + section {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* modern-headerの上部余白削減 */
+    .modern-header {
+        margin-top: 0 !important;
+        padding-top: 0.5rem !important;
+    }
+
+    /* option-menuとの間隔調整 */
+    .streamlit-option-menu {
+        margin-top: 0.5rem !important;
+    }
+
+    /* Streamlitのデフォルトツールバーがある場合の余白削除 */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+
+    /* デコレーション要素の余白削除 */
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+
+    /* ヘッダースペーサーの削除 */
+    [data-testid="stHeaderSpacer"] {
+        display: none !important;
+    }
+
+    /* ========== ヘルプマーク（?）- 高コントラスト版 ========== */
+
+    /* ヘルプアイコンボタン - ダークブルー背景、白アイコン、円形 */
+    [data-testid="stMarkdownHelpIcon"],
+    .stMarkdownHelpIcon,
+    button[title*="Help"],
+    button[aria-label*="Help"],
+    button[aria-label*="help"] {
+        color: #FFFFFF !important;
+        background-color: #1B2559 !important;
+        border-radius: 50% !important;
+        padding: 0.25rem !important;
+        border: none !important;
+        box-shadow: 0 2px 6px rgba(27, 37, 89, 0.3) !important;
+        width: 24px !important;
+        height: 24px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* ヘルプアイコン内のSVG要素を白色に */
+    [data-testid="stMarkdownHelpIcon"] svg,
+    .stMarkdownHelpIcon svg,
+    button[title*="Help"] svg,
+    button[aria-label*="Help"] svg,
+    button[aria-label*="help"] svg,
+    [data-testid="stMarkdownHelpIcon"] path,
+    .stMarkdownHelpIcon path,
+    button[title*="Help"] path,
+    button[aria-label*="Help"] path,
+    button[aria-label*="help"] path,
+    [data-testid="stMarkdownHelpIcon"] circle,
+    .stMarkdownHelpIcon circle,
+    button[title*="Help"] circle,
+    button[aria-label*="Help"] circle,
+    button[aria-label*="help"] circle {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+    }
+
+    /* ヘルプアイコンのホバー時 - 明るいブルーに */
+    [data-testid="stMarkdownHelpIcon"]:hover,
+    .stMarkdownHelpIcon:hover,
+    button[title*="Help"]:hover,
+    button[aria-label*="Help"]:hover,
+    button[aria-label*="help"]:hover {
+        color: #FFFFFF !important;
+        background-color: #3B82F6 !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+        transform: scale(1.1) !important;
+    }
+
+    [data-testid="stMarkdownHelpIcon"]:hover svg,
+    .stMarkdownHelpIcon:hover svg,
+    button[title*="Help"]:hover svg,
+    button[aria-label*="Help"]:hover svg,
+    button[aria-label*="help"]:hover svg,
+    [data-testid="stMarkdownHelpIcon"]:hover path,
+    .stMarkdownHelpIcon:hover path,
+    button[title*="Help"]:hover path,
+    button[aria-label*="Help"]:hover path,
+    button[aria-label*="help"]:hover path,
+    [data-testid="stMarkdownHelpIcon"]:hover circle,
+    .stMarkdownHelpIcon:hover circle,
+    button[title*="Help"]:hover circle,
+    button[aria-label*="Help"]:hover circle,
+    button[aria-label*="help"]:hover circle {
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+    }
+
+    /* ========== パスワード表示ボタン（目アイコン）- 高コントラスト版 ========== */
+
+    /* パスワード入力欄の目アイコンボタン */
+    input[type="password"] + button,
+    button[data-testid="StyledIconButton"],
+    .stTextInput button {
+        background-color: #F1F5F9 !important;
+        color: #475569 !important;
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 6px !important;
+        padding: 0.4rem !important;
+        transition: all 0.2s ease !important;
+    }
+
+    input[type="password"] + button:hover,
+    button[data-testid="StyledIconButton"]:hover,
+    .stTextInput button:hover {
+        background-color: #E2E8F0 !important;
+        color: #334155 !important;
+        border-color: #94A3B8 !important;
+    }
+
+    /* パスワードボタン内のアイコン */
+    input[type="password"] + button svg,
+    button[data-testid="StyledIconButton"] svg,
+    .stTextInput button svg {
+        fill: #475569 !important;
+        color: #475569 !important;
+        stroke: #475569 !important;
+    }
+
+    input[type="password"] + button:hover svg,
+    button[data-testid="StyledIconButton"]:hover svg,
+    .stTextInput button:hover svg {
+        fill: #334155 !important;
+        color: #334155 !important;
+        stroke: #334155 !important;
     }
     </style>"""
     return css

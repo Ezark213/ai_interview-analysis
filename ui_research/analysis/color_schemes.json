@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "created_at": "2026-03-30",
+    "source": "UI/UXベンチマーク調査（20サイト）",
+    "extraction_method": "スクリーンショット分析（Pillow/OpenCV）"
+  },
+  "sites": [
+    {
+      "id": "01_huggingface",
+      "name": "Hugging Face",
+      "category": "AI/ML Platform",
+      "palette": {
+        "primary": "",
+        "secondary": "",
+        "accent": "",
+        "background": "",
+        "surface": "",
+        "text_primary": "",
+        "text_secondary": "",
+        "success": "",
+        "warning": "",
+        "error": ""
+      },
+      "notes": ""
+    },
+    {
+      "id": "02_wandb",
+      "name": "Weights & Biases",
+      "category": "AI/ML Platform",
+      "palette": {
+        "primary": "",
+        "secondary": "",
+        "accent": "",
+        "background": "",
+        "surface": "",
+        "text_primary": "",
+        "text_secondary": "",
+        "success": "",
+        "warning": "",
+        "error": ""
+      },
+      "notes": ""
+    }
+  ],
+  "trends": {
+    "primary_colors": {
+      "description": "主要カラーの傾向（スクリーンショット分析後に記入）",
+      "common_values": []
+    },
+    "background_colors": {
+      "description": "背景色の傾向",
+      "common_values": []
+    },
+    "accent_colors": {
+      "description": "アクセントカラーの傾向",
+      "common_values": []
+    }
+  },
+  "recommendations": {
+    "for_ai_interview_system": {
+      "primary": {
+        "value": "",
+        "reason": ""
+      },
+      "secondary": {
+        "value": "",
+        "reason": ""
+      },
+      "accent": {
+        "value": "",
+        "reason": ""
+      },
+      "background": {
+        "value": "",
+        "reason": ""
+      },
+      "data_visualization": {
+        "chart_colors": [],
+        "reason": ""
+      }
+    }
+  }
+}

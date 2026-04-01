@@ -1,0 +1,211 @@
+{
+  "sites": [
+    {
+      "id": "01_huggingface",
+      "name": "Hugging Face",
+      "category": "AI/ML Platform",
+      "url": "https://huggingface.co/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://huggingface.co/models",
+        "https://huggingface.co/spaces"
+      ]
+    },
+    {
+      "id": "02_wandb",
+      "name": "Weights & Biases",
+      "category": "AI/ML Platform",
+      "url": "https://wandb.ai/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://wandb.ai/site"
+      ]
+    },
+    {
+      "id": "03_comet",
+      "name": "Comet ML",
+      "category": "AI/ML Platform",
+      "url": "https://www.comet.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.comet.com/site/products/"
+      ]
+    },
+    {
+      "id": "04_neptune",
+      "name": "Neptune.ai",
+      "category": "AI/ML Platform",
+      "url": "https://neptune.ai/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://neptune.ai/product"
+      ]
+    },
+    {
+      "id": "05_datadog",
+      "name": "Datadog AI",
+      "category": "AI/ML Platform",
+      "url": "https://www.datadoghq.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.datadoghq.com/product/"
+      ]
+    },
+    {
+      "id": "06_tableau",
+      "name": "Tableau Cloud",
+      "category": "Data Visualization",
+      "url": "https://www.tableau.com/products/cloud",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.tableau.com/"
+      ]
+    },
+    {
+      "id": "07_looker",
+      "name": "Looker",
+      "category": "Data Visualization",
+      "url": "https://cloud.google.com/looker",
+      "wait_selector": "main",
+      "additional_pages": []
+    },
+    {
+      "id": "08_metabase",
+      "name": "Metabase",
+      "category": "Data Visualization",
+      "url": "https://www.metabase.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.metabase.com/product"
+      ]
+    },
+    {
+      "id": "09_amplitude",
+      "name": "Amplitude",
+      "category": "Data Visualization",
+      "url": "https://amplitude.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://amplitude.com/platform"
+      ]
+    },
+    {
+      "id": "10_mixpanel",
+      "name": "Mixpanel",
+      "category": "Data Visualization",
+      "url": "https://mixpanel.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://mixpanel.com/product"
+      ]
+    },
+    {
+      "id": "11_lever",
+      "name": "Lever",
+      "category": "HR Tech",
+      "url": "https://www.lever.co/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.lever.co/product"
+      ]
+    },
+    {
+      "id": "12_greenhouse",
+      "name": "Greenhouse",
+      "category": "HR Tech",
+      "url": "https://www.greenhouse.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.greenhouse.com/product"
+      ]
+    },
+    {
+      "id": "13_hirevue",
+      "name": "HireVue",
+      "category": "HR Tech",
+      "url": "https://www.hirevue.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.hirevue.com/products"
+      ]
+    },
+    {
+      "id": "14_pymetrics",
+      "name": "Pymetrics",
+      "category": "HR Tech",
+      "url": "https://www.pymetrics.ai/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.pymetrics.ai/platform"
+      ]
+    },
+    {
+      "id": "15_workable",
+      "name": "Workable",
+      "category": "HR Tech",
+      "url": "https://www.workable.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.workable.com/features"
+      ]
+    },
+    {
+      "id": "16_linear",
+      "name": "Linear",
+      "category": "Modern SaaS",
+      "url": "https://linear.app/",
+      "wait_selector": "main",
+      "additional_pages": []
+    },
+    {
+      "id": "17_notion",
+      "name": "Notion",
+      "category": "Modern SaaS",
+      "url": "https://www.notion.so/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.notion.so/product"
+      ]
+    },
+    {
+      "id": "18_airtable",
+      "name": "Airtable",
+      "category": "Modern SaaS",
+      "url": "https://www.airtable.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.airtable.com/platform"
+      ]
+    },
+    {
+      "id": "19_stripe",
+      "name": "Stripe Dashboard",
+      "category": "Enterprise Dashboard",
+      "url": "https://stripe.com/",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://stripe.com/payments"
+      ]
+    },
+    {
+      "id": "20_mongodb",
+      "name": "MongoDB Atlas",
+      "category": "Enterprise Dashboard",
+      "url": "https://www.mongodb.com/atlas",
+      "wait_selector": "main",
+      "additional_pages": [
+        "https://www.mongodb.com/products/platform"
+      ]
+    }
+  ],
+  "viewport_sizes": {
+    "desktop": {"width": 1920, "height": 1080},
+    "tablet": {"width": 768, "height": 1024},
+    "mobile": {"width": 375, "height": 812}
+  },
+  "screenshot_settings": {
+    "full_page": true,
+    "timeout": 30000,
+    "retry_attempts": 3
+  }
+}
