@@ -17,80 +17,44 @@ def inject_custom_css() -> str:
 
     /* ========== カラーパレット（CSS変数） ========== */
     :root {
-        /* プライマリカラー */
-        --primary-dark-navy: #1B2559;
-        --primary-blue: #4F6AF0;
-        --primary-light-blue: #6B84FF;
+        /* ========================================
+           メインカラー
+           ======================================== */
+        --primary-dark: #1E3A8A;
+        --primary-darker: #1E40AF;
+        --primary-accent: #3B82F6;
 
-        /* セマンティックカラー */
-        --success: #10B981;
-        --warning: #F59E0B;
-        --danger: #EF4444;
+        /* ========================================
+           背景カラー
+           ======================================== */
+        --background-dark: #0F172A;
+        --background-medium: #1E293B;
+        --background-light: #334155;
 
-        /* ニュートラルカラー */
-        --background: #F8FAFC;
-        --card-bg: #FFFFFF;
-        --text-primary: #1E293B;
-        --text-secondary: #64748B;
-        --border-color: #E2E8F0;
+        /* ========================================
+           テキストカラー
+           ======================================== */
+        --text-white: #FFFFFF;
+        --text-gray: #E2E8F0;
+        --text-muted: #94A3B8;
 
-        /* スペーシング */
-        --spacing-xs: 0.25rem;
-        --spacing-sm: 0.5rem;
-        --spacing-md: 1rem;
-        --spacing-lg: 1.5rem;
-        --spacing-xl: 2rem;
+        /* ========================================
+           アクセントカラー（ステータス）
+           ======================================== */
+        --accent-blue: #3B82F6;
+        --accent-green: #10B981;
+        --accent-red: #EF4444;
+        --accent-yellow: #F59E0B;
 
-        /* ボーダーRadius */
-        --radius-sm: 6px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-
-        /* シャドウ */
-        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-
-        /* サーフェスカラー（新規追加 - Notion/Linear風） */
-        --surface-primary: #FFFFFF;
-        --surface-secondary: #F8F9FA;
-        --surface-tertiary: #F1F3F5;
-        --text-heading: #1F2937;
-        --text-body: #6B7280;
-        --text-muted: #9CA3AF;
-
-        /* データビジュアライゼーション用カラーパレット（新規追加 - Tableau風） */
-        --chart-color-1: #3B82F6;  /* ブルー */
-        --chart-color-2: #10B981;  /* グリーン */
-        --chart-color-3: #F59E0B;  /* オレンジ */
-        --chart-color-4: #EF4444;  /* レッド */
-        --chart-color-5: #8B5CF6;  /* パープル */
-        --chart-color-6: #EC4899;  /* ピンク */
-
-        /* ステータスカラー（新規追加 - Datadog風） */
-        --status-success: #10B981;
-        --status-warning: #F59E0B;
-        --status-error: #EF4444;
-        --status-info: #3B82F6;
-
-        /* フォントサイズ階層（新規追加 - Linear風） */
-        --font-size-h1: 2.5rem;      /* 40px */
-        --font-size-h2: 2rem;        /* 32px */
-        --font-size-h3: 1.5rem;      /* 24px */
-        --font-size-body: 1rem;      /* 16px */
-        --font-size-small: 0.875rem; /* 14px */
-        --font-size-caption: 0.75rem; /* 12px */
-
-        /* フォントウェイト（新規追加） */
-        --font-weight-bold: 700;
-        --font-weight-semibold: 600;
-        --font-weight-medium: 500;
-        --font-weight-normal: 400;
-
-        /* 行間（新規追加） */
-        --line-height-tight: 1.25;
-        --line-height-normal: 1.5;
-        --line-height-relaxed: 1.75;
+        /* ========================================
+           データビジュアライゼーション用カラー
+           ======================================== */
+        --viz-color-1: #3B82F6;
+        --viz-color-2: #10B981;
+        --viz-color-3: #F59E0B;
+        --viz-color-4: #EF4444;
+        --viz-color-5: #8B5CF6;
+        --viz-color-6: #EC4899;
     }
 
     /* ========== グローバルスタイル（強化版）========== */

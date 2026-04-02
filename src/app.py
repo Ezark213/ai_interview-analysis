@@ -61,6 +61,243 @@ custom_css = inject_custom_css()
 # Try both methods for maximum compatibility
 st.markdown(custom_css, unsafe_allow_html=True)
 
+# 上部余白削除 + ダークテーマ配色の追加CSS
+additional_css = """
+<style>
+/* ========================================
+   上部余白の完全削除
+   ======================================== */
+.main > div {
+    padding-top: 0 !important;
+}
+
+header {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.block-container {
+    padding-top: 1rem !important;
+}
+
+/* ========================================
+   背景色の統一（ダークネイビー）
+   ======================================== */
+.stApp {
+    background-color: #0F172A !important;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #1E293B !important;
+}
+
+/* ========================================
+   テキストカラーの統一（白）
+   ======================================== */
+.stApp, .stMarkdown, p, span, div, label {
+    color: #FFFFFF !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #FFFFFF !important;
+}
+
+/* ========================================
+   ボタンの配色
+   ======================================== */
+.stButton > button {
+    background-color: #1E3A8A !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+}
+
+.stButton > button:hover {
+    background-color: #1E40AF !important;
+    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4) !important;
+}
+
+/* ========================================
+   タブの配色
+   ======================================== */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: #1E293B !important;
+    padding: 0.5rem !important;
+    border-radius: 8px !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #E2E8F0 !important;
+    background-color: transparent !important;
+    border-radius: 6px !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: #334155 !important;
+    color: #FFFFFF !important;
+}
+
+/* ========================================
+   入力フィールドの配色
+   ======================================== */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background-color: #1E293B !important;
+    color: #FFFFFF !important;
+    border: 1px solid #334155 !important;
+}
+
+.stSelectbox > div > div {
+    background-color: #1E293B !important;
+    color: #FFFFFF !important;
+}
+
+/* ========================================
+   カードコンポーネントの配色
+   ======================================== */
+div[data-testid="stExpander"] {
+    background-color: #1E293B !important;
+    border: 1px solid #334155 !important;
+}
+
+/* ========================================
+   アラート・通知の配色
+   ======================================== */
+.stAlert {
+    background-color: #1E293B !important;
+    color: #FFFFFF !important;
+    border-left: 4px solid #3B82F6 !important;
+}
+
+.stSuccess {
+    border-left-color: #10B981 !important;
+}
+
+.stWarning {
+    border-left-color: #F59E0B !important;
+}
+
+.stError {
+    border-left-color: #EF4444 !important;
+}
+
+/* ========================================
+   レスポンシブデザイン - メディアクエリ
+   ======================================== */
+
+/* モバイル（640px以下） */
+@media (max-width: 640px) {
+    /* フォントサイズ */
+    body, .stApp, .stMarkdown, p, span, div, label {
+        font-size: 14px !important;
+    }
+
+    h1 { font-size: 24px !important; }
+    h2 { font-size: 20px !important; }
+    h3 { font-size: 18px !important; }
+
+    /* ボタンサイズ（タッチターゲット: 最小44x44px） */
+    .stButton > button {
+        min-width: 44px !important;
+        min-height: 44px !important;
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+
+    /* パディング・マージン */
+    .block-container {
+        padding: 1rem 0.5rem !important;
+    }
+
+    /* タブ */
+    .stTabs [data-baseweb="tab"] {
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+    }
+
+    /* 入力フィールド */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    /* カラムレイアウト（強制1カラム） */
+    [data-testid="column"] {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+}
+
+/* タブレット（641px - 1024px） */
+@media (min-width: 641px) and (max-width: 1024px) {
+    /* フォントサイズ */
+    body, .stApp, .stMarkdown, p, span, div, label {
+        font-size: 16px !important;
+    }
+
+    h1 { font-size: 28px !important; }
+    h2 { font-size: 24px !important; }
+    h3 { font-size: 20px !important; }
+
+    /* ボタンサイズ */
+    .stButton > button {
+        padding: 10px 14px !important;
+        font-size: 16px !important;
+    }
+
+    /* パディング・マージン */
+    .block-container {
+        padding: 2rem 1rem !important;
+    }
+
+    /* タブ */
+    .stTabs [data-baseweb="tab"] {
+        font-size: 16px !important;
+        padding: 10px 16px !important;
+    }
+
+    /* カラムレイアウト（2カラム推奨） */
+    [data-testid="column"] {
+        min-width: 45% !important;
+    }
+}
+
+/* デスクトップ（1025px以上） */
+@media (min-width: 1025px) {
+    /* フォントサイズ */
+    body, .stApp, .stMarkdown, p, span, div, label {
+        font-size: 18px !important;
+    }
+
+    h1 { font-size: 32px !important; }
+    h2 { font-size: 28px !important; }
+    h3 { font-size: 24px !important; }
+
+    /* ボタンサイズ */
+    .stButton > button {
+        padding: 12px 16px !important;
+        font-size: 18px !important;
+    }
+
+    /* パディング・マージン */
+    .block-container {
+        padding: 3rem 2rem !important;
+    }
+
+    /* タブ */
+    .stTabs [data-baseweb="tab"] {
+        font-size: 18px !important;
+        padding: 12px 20px !important;
+    }
+}
+</style>
+"""
+st.markdown(additional_css, unsafe_allow_html=True)
+
 # Also try using components.html if available
 try:
     import streamlit.components.v1 as components
