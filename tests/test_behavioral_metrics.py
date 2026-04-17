@@ -314,3 +314,156 @@ class TestBehavioralMetrics:
         assert metrics["speech_fluency"] == "高"
         # gesture_naturalness: 中(2) vs 高(1) → 中
         assert metrics["gesture_naturalness"] == "中"
+
+
+# ===== Iteration-03: 境界値・異常系テスト (T03-01) + end-to-end (T03-03) =====
+
+class TestBehavioralMetricsEdgeCases:
+    """validate_behavioral_metrics() の境界値・異常系テスト（T03-01）"""
+
+    def test_mixed_old_new_metrics(self):
+        """旧フィールドと新フィールドが混在する入力"""
+        from src.response_parser import validate_behavioral_metrics
+        mixed = {
+            # 旧スキーマ
+            "eye_contact_quality": "高",
+            "posture_stability": "高",
+            # 新スキーマ
+            "deliberate_eye_contact": "なし",
+            "illustrator_frequency": "豊富",
+        }
+        warnings = validate_behavioral_metrics(mixed)
+        old_key_warnings = [w for w in warnings if "eye_contact_quality" in w or "posture_stability" in w]
+        assert len(old_key_warnings) >= 2, f"旧フィールド2つに対して警告が出るべき: {warnings}"
+        new_key_warnings = [w for w in warnings if "deliberate_eye_contact" in w or "illustrator_frequency" in w]
+        assert len(new_key_warnings) == 0, f"新フィールドに対して警告が出てはいけない: {warnings}"
+
+    def test_null_metrics_values(self):
+        """値がNoneの新フィールドがあっても警告なし"""
+        from src.response_parser import validate_behavioral_metrics
+        metrics = {
+            "deliberate_eye_contact": None,
+            "illustrator_frequency": "豊富",
+            "cognitive_load_signs": None,
+        }
+        warnings = validate_behavioral_metrics(metrics)
+        none_warnings = [w for w in warnings if "None" in str(w)]
+        assert len(none_warnings) == 0, f"None値に対して警告が出てはいけない: {warnings}"
+
+    def test_wrong_type_metrics(self):
+        """int型やlist型など不正な型の値"""
+        from src.response_parser import validate_behavioral_metrics
+        metrics = {
+            "deliberate_eye_contact": 123,
+            "illustrator_frequency": ["豊富", "普通"],
+            "speech_fluency": True,
+        }
+        warnings = validate_behavioral_metrics(metrics)
+        assert len(warnings) >= 3, f"型異常の3フィールドに対して警告が出るべき: {warnings}"
+
+    def test_only_unknown_keys(self):
+        """全て未知キーのみの入力"""
+        from src.response_parser import validate_behavioral_metrics
+        metrics = {
+            "totally_made_up": "value",
+            "another_fake_key": "test",
+        }
+        warnings = validate_behavioral_metrics(metrics)
+        assert len(warnings) >= 2, f"未知キー2つに対して警告が出るべき: {warnings}"
+
+    def test_empty_metrics_dict(self):
+        """空辞書で警告なし"""
+        from src.response_parser import validate_behavioral_metrics
+        warnings = validate_behavioral_metrics({})
+        assert warnings == [], f"空辞書に対して警告が出てはいけない: {warnings}"
+
+
+class TestEndToEndPipeline:
+    """end-to-endパイプラインテスト（T03-03）"""
+
+    def test_end_to_end_gemini_response_simulation(self):
+        """新スキーマ準拠の完全なJSONがparse→validate→metricsの全パイプラインを通ること"""
+        import json
+        from src.response_parser import parse_response, validate_response, validate_behavioral_metrics
+        sample_response = json.dumps({
+            "overall_risk_score": 62,
+            "risk_level": "低",
+            "evaluation": {
+                "communication": {
+                    "score": 65,
+                    "observations": [
+                        "質問に対して論理的に回答している（参照: communication BARSレベル4）",
+                        "専門用語を適切に噛み砕いて説明（参照: communication BARSレベル4）"
+                    ],
+                    "confidence": "高"
+                },
+                "stress_tolerance": {
+                    "score": 55,
+                    "observations": ["圧迫質問に対して一定の落ち着きを保った（参照: stress_tolerance BARSレベル3）"],
+                    "confidence": "中"
+                },
+                "reliability": {
+                    "score": 70,
+                    "observations": [
+                        "プロジェクト名と期間を具体的に述べた（参照: reliability BARSレベル4）",
+                        "数値を用いた成果説明（参照: reliability BARSレベル4）"
+                    ],
+                    "confidence": "高"
+                },
+                "teamwork": {
+                    "score": 55,
+                    "observations": ["チーム作業の言及あり（参照: teamwork BARSレベル3）"],
+                    "confidence": "中"
+                },
+                "credibility": {
+                    "score": 60,
+                    "observations": ["検証可能な詳細が一部含まれる（参照: credibility CBCA指標）"],
+                    "confidence": "中"
+                },
+                "professional_demeanor": {
+                    "score": 60,
+                    "observations": ["適切な敬語使用（参照: professional_demeanor BARSレベル3）"],
+                    "confidence": "中"
+                }
+            },
+            "behavioral_metrics": {
+                "deliberate_eye_contact": "なし",
+                "illustrator_frequency": "普通",
+                "speech_fluency": "中",
+                "response_speed": "適切",
+                "verbal_nonverbal_consistency": "一致",
+                "immediacy_level": "高",
+                "cognitive_load_signs": "なし",
+                "micro_expression_detected": "検出不能",
+                "dark_triad_indicators": "なし",
+                "cwb_risk_signals": "なし"
+            },
+            "red_flags": [],
+            "positive_signals": ["具体的なプロジェクト経験を述べた", "言語と非言語の一致度が高い"],
+            "recommendation": "技術面の信頼性は概ね良好。チームワークの具体的エピソードを追加確認することを推奨。",
+            "disclaimer": "本評価はAIによる参考情報です。最終判断は人間が行ってください。"
+        }, ensure_ascii=False)
+
+        # Step 1: parse_response
+        parsed = parse_response(sample_response)
+        assert parsed is not None
+        assert parsed["overall_risk_score"] == 62
+
+        # Step 2: validate_response（ハルシネーションチェック）
+        hal_warnings = validate_response(parsed)
+        assert isinstance(hal_warnings, list)
+
+        # Step 3: validate_behavioral_metrics
+        metrics = parsed.get("behavioral_metrics")
+        assert metrics is not None
+        metric_warnings = validate_behavioral_metrics(metrics)
+        assert metric_warnings == [], f"正常な新スキーマで警告が出ました: {metric_warnings}"
+
+        # Step 4: 新スキーマのフィールドが全て存在すること
+        expected_keys = {
+            "deliberate_eye_contact", "illustrator_frequency", "speech_fluency",
+            "response_speed", "verbal_nonverbal_consistency", "immediacy_level",
+            "cognitive_load_signs", "micro_expression_detected",
+            "dark_triad_indicators", "cwb_risk_signals"
+        }
+        assert set(metrics.keys()) == expected_keys

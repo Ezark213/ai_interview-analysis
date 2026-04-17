@@ -250,10 +250,17 @@ def validate_behavioral_metrics(metrics: dict) -> list:
                 f"behavioral_metrics に未知のキーがあります: '{key}'（現在のスキーマに含まれていません）"
             )
 
-    # 既存のバリデーション
+    # 各メトリクスの値チェック（型チェック → 値チェックの順）
     for key, valid_values in _VALID_METRICS.items():
         value = metrics.get(key)
-        if value is not None and value not in valid_values:
+        if value is None:
+            continue
+        if not isinstance(value, str):
+            warnings.append(
+                f"behavioral_metrics.{key} の型が不正です: {type(value).__name__}（文字列を期待）"
+            )
+            continue
+        if value not in valid_values:
             warnings.append(
                 f"behavioral_metrics.{key} の値が不正です: '{value}'（有効値: {valid_values}）"
             )
