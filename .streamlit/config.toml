@@ -1,8 +1,8 @@
 [theme]
-primaryColor = "#3B82F6"           # アクセントカラー（明るい青）
-backgroundColor = "#0F172A"        # メイン背景（ダークネイビー）
-secondaryBackgroundColor = "#1E293B" # カード背景（ミディアムネイビー）
-textColor = "#FFFFFF"              # テキスト（白）
+primaryColor = "#3B82F6"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F8FAFC"
+textColor = "#1E293B"
 font = "sans serif"
 
 [server]

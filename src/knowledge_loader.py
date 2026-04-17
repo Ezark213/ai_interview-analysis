@@ -16,6 +16,16 @@ _PRESET_REGISTRY = [
         "name": "SES面談",
         "description": "SES業界のエンジニア面談向け。客先常駐適応力・早期離職リスクなどを重視",
     },
+    {
+        "id": "general_hiring",
+        "name": "一般採用",
+        "description": "一般的な中途・新卒採用向け。志望動機の整合性・組織適合・成長意欲を重視",
+    },
+    {
+        "id": "technical_interview",
+        "name": "技術面接",
+        "description": "エンジニア採用の技術面接向け。問題解決能力・論理的思考・技術的誠実性を重視",
+    },
 ]
 
 
@@ -86,17 +96,24 @@ def load_combined_knowledge(preset_id: str = None, custom_content: str = None) -
     """
     parts = []
 
+    # BARSベース知識（30%ウェイト）— プリセット指定時はプリセット、未指定時はcore-criteria.md
     if preset_id:
-        parts.append(load_preset(preset_id))
+        ses_text = load_preset(preset_id)
+        parts.append(f"# ===== SES評価基準（BARSベース・ウェイト30%）=====\n\n{ses_text}")
+    else:
+        default_text = load_knowledge_base()
+        if default_text:
+            parts.append(default_text)
+
+    # 論文ベース研究知識（70%ウェイト）— 常に含める
+    research_text = load_research_knowledge()
+    if research_text:
+        parts.append(f"# ===== 論文ベース研究知識（6軸ルーブリック・ウェイト70%）=====\n\n{research_text}")
 
     if custom_content:
         parts.append(load_custom_knowledge(custom_content))
 
-    if parts:
-        return "\n\n---\n\n".join(parts)
-
-    # 両方Noneの場合はデフォルト（既存のcore-criteria.md）
-    return load_knowledge_base()
+    return "\n\n---\n\n".join(parts) if parts else ""
 
 
 def load_reference_docs() -> list:

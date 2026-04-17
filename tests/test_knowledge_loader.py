@@ -178,3 +178,140 @@ class TestProjectKnowledgeBase:
         finally:
             # カレントディレクトリを元に戻す
             os.chdir(original_cwd)
+
+
+# ===== Iteration-02: 研究知識スコアリング統合テスト =====
+
+class TestIteration02ResearchIntegration:
+    """Iteration-02: 研究知識をスコアリングに統合するためのテスト"""
+
+    def test_load_combined_knowledge_includes_research(self):
+        """load_combined_knowledge がresearchファイルの内容を含むこと"""
+        from src.knowledge_loader import load_combined_knowledge
+        result = load_combined_knowledge(preset_id="ses_interview")
+        # research/05_integrated_scoring_rubric.md の冒頭テキストが含まれること
+        assert "統合評価スコアリングルーブリック" in result or "Axis 1" in result
+
+    def test_system_prompt_has_weight_instruction(self):
+        """system.txt がウェイト指示を含むこと"""
+        system_txt = (project_root / "src" / "prompts" / "system.txt").read_text(encoding="utf-8")
+        assert "70%" in system_txt or "研究ベース" in system_txt
+
+    def test_default_score_is_50(self):
+        """system.txt のデフォルトスコアが50点であること（厳格化）"""
+        system_txt = (project_root / "src" / "prompts" / "system.txt").read_text(encoding="utf-8")
+        assert "デフォルト" in system_txt and "50点" in system_txt
+
+
+# ===== Iteration-02: save_reference_doc / load_reference_docs カバレッジ向上 =====
+
+class TestReferenceDocOperations:
+    """save_reference_doc と load_reference_docs の異常系・境界値テスト"""
+
+    def test_save_reference_doc_invalid_extension(self, tmp_path):
+        """.md以外の拡張子でValueError"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        kl._REFERENCE_DIR = tmp_path / "reference"
+        try:
+            with pytest.raises(ValueError, match=".md"):
+                kl.save_reference_doc("test.txt", "some content")
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_save_reference_doc_empty_content(self, tmp_path):
+        """空コンテンツでValueError"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        kl._REFERENCE_DIR = tmp_path / "reference"
+        try:
+            with pytest.raises(ValueError):
+                kl.save_reference_doc("test.md", "")
+            with pytest.raises(ValueError):
+                kl.save_reference_doc("test.md", "   \n  ")
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_save_reference_doc_creates_file(self, tmp_path):
+        """正常系: ファイルが保存されパスが返る"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        kl._REFERENCE_DIR = tmp_path / "reference"
+        try:
+            path = kl.save_reference_doc("doc.md", "# テスト\n内容")
+            assert Path(path).exists()
+            assert Path(path).read_text(encoding="utf-8") == "# テスト\n内容"
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_load_reference_docs_empty_dir(self, tmp_path):
+        """reference/ が空の場合、空リストを返す"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        ref_dir = tmp_path / "reference"
+        ref_dir.mkdir()
+        kl._REFERENCE_DIR = ref_dir
+        try:
+            result = kl.load_reference_docs()
+            assert result == []
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_load_reference_docs_nonexistent_dir(self, tmp_path):
+        """reference/ が存在しない場合、空リストを返す"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        kl._REFERENCE_DIR = tmp_path / "nonexistent"
+        try:
+            result = kl.load_reference_docs()
+            assert result == []
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_load_reference_docs_returns_correct_structure(self, tmp_path):
+        """ファイルがある場合、filename/path/content を持つ辞書リストを返す"""
+        import src.knowledge_loader as kl
+        original = kl._REFERENCE_DIR
+        ref_dir = tmp_path / "reference"
+        ref_dir.mkdir()
+        (ref_dir / "sample.md").write_text("# サンプル", encoding="utf-8")
+        kl._REFERENCE_DIR = ref_dir
+        try:
+            result = kl.load_reference_docs()
+            assert len(result) == 1
+            assert result[0]["filename"] == "sample.md"
+            assert "# サンプル" in result[0]["content"]
+            assert "path" in result[0]
+        finally:
+            kl._REFERENCE_DIR = original
+
+    def test_load_preset_file_not_found(self, tmp_path):
+        """プリセットIDは有効だがファイルが存在しない場合 FileNotFoundError"""
+        import src.knowledge_loader as kl
+        original = kl._PRESETS_DIR
+        (tmp_path / "presets").mkdir()
+        kl._PRESETS_DIR = tmp_path / "presets"  # ファイルなしの空ディレクトリ
+        try:
+            with pytest.raises(FileNotFoundError):
+                kl.load_preset("ses_interview")  # IDは有効だがファイルなし
+        finally:
+            kl._PRESETS_DIR = original
+
+
+# ===== Iteration-03: 統合知識の量・構造検証テスト =====
+
+class TestIteration03KnowledgeIntegrity:
+    """Iteration-03: 統合後ナレッジの量・6軸構造の整合性検証"""
+
+    def test_combined_knowledge_word_count(self):
+        """研究統合後のナレッジが十分な量を持つこと（5000文字以上）"""
+        from src.knowledge_loader import load_combined_knowledge
+        result = load_combined_knowledge(preset_id="ses_interview")
+        assert len(result) >= 5000
+
+    def test_research_axes_in_knowledge(self):
+        """研究6軸（Axis 1〜6）が全てナレッジに含まれること"""
+        from src.knowledge_loader import load_combined_knowledge
+        result = load_combined_knowledge(preset_id="ses_interview")
+        for axis in ["Axis 1", "Axis 2", "Axis 3", "Axis 4", "Axis 5", "Axis 6"]:
+            assert axis in result, f"{axis}がナレッジに含まれていない"

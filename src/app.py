@@ -9,7 +9,7 @@ AI面談動画解析システム - Streamlit Web UI
 import sys
 import io
 
-if sys.platform == 'win32':
+if sys.platform == 'win32' and 'streamlit' not in sys.modules:
     try:
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
@@ -61,7 +61,7 @@ custom_css = inject_custom_css()
 # Try both methods for maximum compatibility
 st.markdown(custom_css, unsafe_allow_html=True)
 
-# 上部余白削除 + ダークテーマ配色の追加CSS
+# 上部余白削除の追加CSS
 additional_css = """
 <style>
 /* ========================================
@@ -78,110 +78,6 @@ header {
 
 .block-container {
     padding-top: 1rem !important;
-}
-
-/* ========================================
-   背景色の統一（ダークネイビー）
-   ======================================== */
-.stApp {
-    background-color: #0F172A !important;
-}
-
-section[data-testid="stSidebar"] {
-    background-color: #1E293B !important;
-}
-
-/* ========================================
-   テキストカラーの統一（白）
-   ======================================== */
-.stApp, .stMarkdown, p, span, div, label {
-    color: #FFFFFF !important;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    color: #FFFFFF !important;
-}
-
-/* ========================================
-   ボタンの配色
-   ======================================== */
-.stButton > button {
-    background-color: #1E3A8A !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 0.5rem 1rem !important;
-    font-weight: 500 !important;
-}
-
-.stButton > button:hover {
-    background-color: #1E40AF !important;
-    box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4) !important;
-}
-
-/* ========================================
-   タブの配色
-   ======================================== */
-.stTabs [data-baseweb="tab-list"] {
-    background-color: #1E293B !important;
-    padding: 0.5rem !important;
-    border-radius: 8px !important;
-}
-
-.stTabs [data-baseweb="tab"] {
-    color: #E2E8F0 !important;
-    background-color: transparent !important;
-    border-radius: 6px !important;
-    padding: 0.5rem 1rem !important;
-}
-
-.stTabs [aria-selected="true"] {
-    background-color: #334155 !important;
-    color: #FFFFFF !important;
-}
-
-/* ========================================
-   入力フィールドの配色
-   ======================================== */
-.stTextInput > div > div > input,
-.stTextArea > div > div > textarea {
-    background-color: #1E293B !important;
-    color: #FFFFFF !important;
-    border: 1px solid #334155 !important;
-}
-
-.stSelectbox > div > div {
-    background-color: #1E293B !important;
-    color: #FFFFFF !important;
-}
-
-/* ========================================
-   カードコンポーネントの配色
-   ======================================== */
-div[data-testid="stExpander"] {
-    background-color: #1E293B !important;
-    border: 1px solid #334155 !important;
-}
-
-/* ========================================
-   アラート・通知の配色
-   ======================================== */
-.stAlert {
-    background-color: #1E293B !important;
-    color: #FFFFFF !important;
-    border-left: 4px solid #3B82F6 !important;
-}
-
-.stSuccess {
-    border-left-color: #10B981 !important;
-}
-
-.stWarning {
-    border-left-color: #F59E0B !important;
-}
-
-.stError {
-    border-left-color: #EF4444 !important;
 }
 
 /* ========================================
@@ -322,7 +218,7 @@ st.markdown("""
 from src.config import load_api_keys, get_key_source
 api_key_1, api_key_2, openai_key = load_api_keys()
 
-from src.knowledge_loader import load_combined_knowledge, load_reference_docs, save_reference_doc, load_preset
+from src.knowledge_loader import load_combined_knowledge, load_reference_docs, save_reference_doc, load_preset, load_research_knowledge
 
 # モデル選択（session_stateで管理、設定タブで変更可能）
 if "model" not in st.session_state:
@@ -388,6 +284,32 @@ if selected == "ナレッジベース":
     # --- 参考資料 ---
     st.subheader("参考資料（人間閲覧用）")
     st.caption("理論的背景や学術的根拠などの参考資料です。AIプロンプトには投入されません。")
+
+    # 研究ベース知識（AIプロンプトに投入・70%ウェイト）
+    st.subheader("研究ベース評価知識（AIプロンプトに投入・70%ウェイト）")
+    st.markdown("4論文横断の実証データに基づく6軸評価ルーブリックです。スコアリングに直接使用されます。")
+
+    research_dir = Path(__file__).parent.parent / "knowledge-base" / "research"
+    if research_dir.exists():
+        research_files = sorted(research_dir.glob("*.md"))
+        if research_files:
+            for rf in research_files:
+                try:
+                    rf_content = rf.read_text(encoding="utf-8")
+                    with st.expander(f"[AIプロンプト投入済み] {rf.name}"):
+                        # 冒頭のタイトルと概要を抽出して表示
+                        lines = rf_content.split("\n")
+                        title = next((l.lstrip("#").strip() for l in lines if l.startswith("#")), rf.name)
+                        st.markdown(f"**{title}**")
+                        st.markdown(rf_content[:800] + ("..." if len(rf_content) > 800 else ""))
+                except Exception:
+                    pass
+        else:
+            st.info("research/ ディレクトリにファイルがありません")
+    else:
+        st.warning("knowledge-base/research/ ディレクトリが見つかりません")
+
+    st.divider()
 
     ref_docs = load_reference_docs()
     if ref_docs:
@@ -848,7 +770,7 @@ if selected == "単一動画解析":
                                     score_val = data.get("score", 0)
                                     confidence = data.get("confidence", "不明")
                                     observations = data.get("observations", [])
-                                    reason = "\n".join([f"• {obs}" for obs in observations]) if observations else "観察事項なし"
+                                    reason = "<br>".join([f"• {obs}" for obs in observations]) if observations else "観察事項なし"
 
                                     # カテゴリスコアカード
                                     category_card_html = render_category_score_card(
@@ -892,13 +814,16 @@ if selected == "単一動画解析":
                         if metrics:
                             st.header("行動メトリクス")
                             metrics_df = pd.DataFrame([
-                                {"指標": "アイコンタクトの質", "評価": metrics.get("eye_contact_quality", "-")},
-                                {"指標": "ジェスチャーの自然さ", "評価": metrics.get("gesture_naturalness", "-")},
-                                {"指標": "姿勢の安定性", "評価": metrics.get("posture_stability", "-")},
+                                {"指標": "意図的アイコンタクト", "評価": metrics.get("deliberate_eye_contact", "-")},
+                                {"指標": "Illustrators（発話補助ジェスチャー）頻度", "評価": metrics.get("illustrator_frequency", "-")},
                                 {"指標": "発話の流暢さ", "評価": metrics.get("speech_fluency", "-")},
-                                {"指標": "フィラーの頻度", "評価": metrics.get("filler_frequency", "-")},
                                 {"指標": "応答速度", "評価": metrics.get("response_speed", "-")},
                                 {"指標": "言語-非言語の一致度", "評価": metrics.get("verbal_nonverbal_consistency", "-")},
+                                {"指標": "直接的関与度（Immediacy）", "評価": metrics.get("immediacy_level", "-")},
+                                {"指標": "認知的負荷サイン", "評価": metrics.get("cognitive_load_signs", "-")},
+                                {"指標": "微表情検出", "評価": metrics.get("micro_expression_detected", "-")},
+                                {"指標": "ダークトライアド兆候", "評価": metrics.get("dark_triad_indicators", "-")},
+                                {"指標": "CWBリスク信号", "評価": metrics.get("cwb_risk_signals", "-")},
                             ])
                             st.table(metrics_df)
 
