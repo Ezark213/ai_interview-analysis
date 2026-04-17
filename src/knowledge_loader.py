@@ -155,6 +155,18 @@ def save_reference_doc(filename: str, content: str) -> str:
     return str(save_path)
 
 
+def load_research_knowledge() -> str:
+    """論文ベースの研究知識ファイルを全て読み込んで結合する"""
+    research_dir = _PROJECT_ROOT / "knowledge-base" / "research"
+    if not research_dir.exists():
+        return ""
+    files = sorted(research_dir.glob("*.md"))
+    contents = []
+    for f in files:
+        contents.append(f.read_text(encoding="utf-8"))
+    return "\n\n---\n\n".join(contents)
+
+
 def load_knowledge_base(knowledge_dir: str = None) -> str:
     """
     指定ディレクトリ内の全.mdファイルを読み込み、結合したテキストを返す

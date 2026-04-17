@@ -104,6 +104,31 @@ class TestProjectKnowledgeBase:
         assert "評価" in knowledge_base or "基準" in knowledge_base, \
             "Knowledge base does not contain expected content"
 
+    # ===== Iteration-01: 論文ベース知識統合テスト =====
+
+    def test_research_directory_exists(self):
+        """research/ディレクトリが存在することを確認"""
+        research_dir = project_root / "knowledge-base" / "research"
+        assert research_dir.exists(), "knowledge-base/research/ が存在しません"
+
+    def test_research_files_loadable(self):
+        """5つの論文MDファイルが読み込めることを確認"""
+        from src.knowledge_loader import load_research_knowledge
+        content = load_research_knowledge()
+        assert "認知的負荷" in content
+        assert "微表情" in content
+        assert "CWB" in content
+        assert "レッドフラグ" in content
+        assert "スコアリング" in content
+
+    def test_core_criteria_includes_research_supplement(self):
+        """core-criteria.mdに論文ベース評価補足が含まれることを確認"""
+        core_criteria = project_root / "knowledge-base" / "core-criteria.md"
+        content = core_criteria.read_text(encoding="utf-8")
+        assert "論文ベース評価補足" in content
+        assert "認知的負荷" in content
+        assert "Immediacy" in content
+
     def test_load_knowledge_base_from_src_directory(self):
         """srcディレクトリから実行した場合でも正しく読み込めることを確認"""
         # カレントディレクトリをsrcに変更
