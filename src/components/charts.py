@@ -116,9 +116,12 @@ def create_score_trend_chart(chunk_results: List[dict]) -> go.Figure:
         "職業的態度": "#EC4899"
     }
 
-    # 各カテゴリの推移を折れ線グラフで表示
-    for category_key, category_name in zip(chunk_results[0]['evaluation'].keys(), categories):
-        scores = [chunk['evaluation'][category_key]['score'] for chunk in chunk_results]
+    # 各カテゴリの推移を折れ線グラフで表示（失敗チャンクはNoneでスキップ）
+    successful = [c for c in chunk_results if 'evaluation' in c]
+    if not successful:
+        return fig
+    for category_key, category_name in zip(successful[0]['evaluation'].keys(), categories):
+        scores = [c['evaluation'].get(category_key, {}).get('score') for c in successful]
         chunk_numbers = [i + 1 for i in range(len(chunk_results))]
 
         fig.add_trace(go.Scatter(
