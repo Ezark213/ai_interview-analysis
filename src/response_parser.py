@@ -206,33 +206,51 @@ def _validate_structure(data: Dict[str, Any]) -> None:
         data["behavioral_metrics"] = None
 
 
-# 行動メトリクスの有効な値定義
+# 行動メトリクスの有効な値定義（Iteration-02: 論文ベース科学的指標に再構成）
+# 出典: Vrij (2019), Pérez-Rosas (2015), Ruben David (2025), Yang論文
+# 廃止: eye_contact_quality, gesture_naturalness, posture_stability, filler_frequency（科学的根拠なし）
 _VALID_METRICS = {
-    "eye_contact_quality": {"高", "中", "低"},
-    "gesture_naturalness": {"高", "中", "低"},
-    "posture_stability": {"高", "中", "低"},
+    # 論文ベース非言語指標（Vrij 2019, Pérez-Rosas 2015）
+    "deliberate_eye_contact": {"あり", "なし", "判定不能"},
+    "illustrator_frequency": {"豊富", "普通", "減少", "著しく減少"},
     "speech_fluency": {"高", "中", "低"},
-    "filler_frequency": {"多い", "普通", "少ない"},
     "response_speed": {"速い", "適切", "遅い"},
     "verbal_nonverbal_consistency": {"一致", "部分一致", "不一致"},
+    # 認知的負荷指標（Vrij 2019）
+    "immediacy_level": {"高", "中", "低"},
+    "cognitive_load_signs": {"なし", "軽度", "顕著"},
+    # 微表情指標（Yang論文）
+    "micro_expression_detected": {"あり", "なし", "検出不能"},
+    # リスク指標（Ruben David 2025）
+    "dark_triad_indicators": {"あり", "なし"},
+    "cwb_risk_signals": {"あり", "なし"},
 }
 
 
 def validate_behavioral_metrics(metrics: dict) -> list:
     """
-    行動メトリクスのバリデーション（Iteration-10追加）
+    行動メトリクスのバリデーション（Iteration-02: 論文ベーススキーマに更新）
 
     Args:
         metrics: behavioral_metricsの辞書（Noneの場合は空リストを返す）
 
     Returns:
-        list: 警告メッセージのリスト
+        list: 警告メッセージのリスト（未知のキー検出 + 値バリデーション）
     """
     if not metrics:
         return []
 
     warnings = []
 
+    # 未知のキーを検出（旧スキーマのフィールド等）
+    known_keys = set(_VALID_METRICS.keys())
+    for key in metrics:
+        if key not in known_keys:
+            warnings.append(
+                f"behavioral_metrics に未知のキーがあります: '{key}'（現在のスキーマに含まれていません）"
+            )
+
+    # 既存のバリデーション
     for key, valid_values in _VALID_METRICS.items():
         value = metrics.get(key)
         if value is not None and value not in valid_values:

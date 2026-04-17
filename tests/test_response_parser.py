@@ -274,3 +274,90 @@ class TestHallucinationPrevention:
 
         # 検証: 警告が空リストであること
         assert warnings == [], f"Expected no warnings, got: {warnings}"
+
+
+# ===== Iteration-02: 論文ベース behavioral_metrics スキーマ テスト =====
+
+class TestIteration02BehavioralMetrics:
+    """behavioral_metrics の論文ベース再構成テスト"""
+
+    def test_new_behavioral_metrics_schema(self):
+        """新スキーマの全フィールドがバリデーションを通ること"""
+        from src.response_parser import validate_behavioral_metrics
+        new_metrics = {
+            "deliberate_eye_contact": "なし",
+            "illustrator_frequency": "豊富",
+            "speech_fluency": "高",
+            "response_speed": "適切",
+            "verbal_nonverbal_consistency": "一致",
+            "immediacy_level": "高",
+            "cognitive_load_signs": "なし",
+            "micro_expression_detected": "なし",
+            "dark_triad_indicators": "なし",
+            "cwb_risk_signals": "なし",
+        }
+        warnings = validate_behavioral_metrics(new_metrics)
+        assert warnings == [], f"新スキーマで警告が出ました: {warnings}"
+
+    def test_old_metrics_produce_warnings(self):
+        """旧スキーマのフィールドが警告を出すこと"""
+        from src.response_parser import validate_behavioral_metrics
+        old_metrics = {
+            "eye_contact_quality": "高",
+            "gesture_naturalness": "高",
+            "posture_stability": "高",
+        }
+        warnings = validate_behavioral_metrics(old_metrics)
+        assert len(warnings) > 0, "旧スキーマのフィールドに対して警告が出るべき"
+
+    def test_excluded_indicators_in_prompt(self):
+        """system.txtに除外指標の禁止指示が含まれること"""
+        prompt_path = Path("src/prompts/system.txt")
+        content = prompt_path.read_text(encoding="utf-8")
+        assert "Fidgeting" in content or "そわそわ" in content, "除外指標Fidgetingの記述がない"
+        assert "Gaze aversion" in content or "視線の回避" in content, "除外指標Gaze aversionの記述がない"
+        assert "除外" in content or "禁止" in content or "使用してはならない" in content, "禁止指示の文言がない"
+
+    def test_observation_commands_in_prompt(self):
+        """system.txtに論文ベースの観察命令セクションが含まれること"""
+        prompt_path = Path("src/prompts/system.txt")
+        content = prompt_path.read_text(encoding="utf-8")
+        assert "Illustrator" in content or "illustrator" in content, "Illustrators観察指示がない"
+        assert "認知的負荷" in content, "認知的負荷の観察指示がない"
+        assert "Immediacy" in content or "immediacy" in content, "Immediacy観察指示がない"
+        assert "微表情" in content or "Micro-expression" in content, "微表情の観察指示がない"
+
+    def test_parse_response_with_new_metrics(self):
+        """新スキーマを含む完全なJSONレスポンスがparse_responseを通ること"""
+        from src.response_parser import parse_response
+        sample = {
+            "overall_risk_score": 65,
+            "risk_level": "低",
+            "evaluation": {
+                "communication": {"score": 60, "observations": ["テスト（参照: communication BARSレベル3）"], "confidence": "中"},
+                "stress_tolerance": {"score": 55, "observations": ["テスト（参照: stress_tolerance BARSレベル3）"], "confidence": "中"},
+                "reliability": {"score": 55, "observations": ["テスト（参照: reliability BARSレベル3）"], "confidence": "中"},
+                "teamwork": {"score": 55, "observations": ["テスト（参照: teamwork BARSレベル3）"], "confidence": "中"},
+                "credibility": {"score": 55, "observations": ["テスト（参照: credibility BARSレベル3）"], "confidence": "中"},
+                "professional_demeanor": {"score": 55, "observations": ["テスト（参照: professional_demeanor BARSレベル3）"], "confidence": "中"},
+            },
+            "behavioral_metrics": {
+                "deliberate_eye_contact": "なし",
+                "illustrator_frequency": "豊富",
+                "speech_fluency": "高",
+                "response_speed": "適切",
+                "verbal_nonverbal_consistency": "一致",
+                "immediacy_level": "高",
+                "cognitive_load_signs": "なし",
+                "micro_expression_detected": "なし",
+                "dark_triad_indicators": "なし",
+                "cwb_risk_signals": "なし",
+            },
+            "red_flags": [],
+            "positive_signals": ["テスト"],
+            "recommendation": "テスト推奨事項",
+            "disclaimer": "本評価はAIによる参考情報です。"
+        }
+        result = parse_response(json.dumps(sample))
+        assert result["behavioral_metrics"] is not None
+        assert "deliberate_eye_contact" in result["behavioral_metrics"]
