@@ -676,9 +676,26 @@ if selected == "単一動画解析":
                                     if status == "error":
                                         log_callback(f"  Error: {cr.get('error_message', 'No error message')}")
 
+                                # 失敗チャンクをUI表示
+                                failed_chunks = [cr for cr in chunk_results if cr.get("status") == "error"]
+                                if failed_chunks:
+                                    for fc in failed_chunks:
+                                        err_code = fc.get("error_code", "不明")
+                                        err_msg = fc.get("error_message", "詳細なし")
+                                        st.warning(f"チャンク {fc.get('chunk_id', '?')} 失敗: [{err_code}] {err_msg}")
+
                                 status_text.text("結果を統合中...")
                                 integrator = ChunkIntegrator()
-                                result = integrator.integrate_chunks(chunk_results)
+                                try:
+                                    result = integrator.integrate_chunks(chunk_results)
+                                except ValueError as ve:
+                                    # 全チャンク失敗時：エラー内容をまとめて表示
+                                    st.error("すべてのチャンク解析が失敗しました。")
+                                    for fc in chunk_results:
+                                        err_code = fc.get("error_code", "不明")
+                                        err_msg = fc.get("error_message", "詳細なし")
+                                        st.error(f"チャンク {fc.get('chunk_id', '?')}: [{err_code}] {err_msg}")
+                                    raise ve
 
                                 progress_bar.progress(100)
                                 status_text.text("解析が完了しました")
@@ -687,8 +704,11 @@ if selected == "単一動画解析":
 
                             finally:
                                 status_text.text("分割ファイルを削除中...")
-                                chunker.cleanup()
-                                st.info("分割された動画ファイルを削除しました")
+                                try:
+                                    chunker.cleanup()
+                                    st.info("分割された動画ファイルを削除しました")
+                                except Exception:
+                                    pass
 
                             with st.expander("デバッグ: チャンク処理結果"):
                                 for idx, chunk_res in enumerate(chunk_results):
