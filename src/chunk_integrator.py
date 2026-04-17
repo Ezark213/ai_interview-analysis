@@ -322,9 +322,10 @@ class ChunkIntegrator:
             dict: マージされた行動メトリクス（全チャンクにメトリクスがない場合はNone）
         """
         metric_keys = [
-            "eye_contact_quality", "gesture_naturalness", "posture_stability",
-            "speech_fluency", "filler_frequency", "response_speed",
-            "verbal_nonverbal_consistency",
+            "deliberate_eye_contact", "illustrator_frequency",
+            "speech_fluency", "response_speed", "verbal_nonverbal_consistency",
+            "immediacy_level", "cognitive_load_signs",
+            "micro_expression_detected", "dark_triad_indicators", "cwb_risk_signals",
         ]
 
         # 各チャンクからメトリクスを収集

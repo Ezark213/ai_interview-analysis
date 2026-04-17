@@ -230,13 +230,16 @@ class TestBehavioralMetrics:
                     "professional_demeanor": {"score": 70, "observations": ["テスト1（参照: 基準）"], "confidence": "中"},
                 },
                 "behavioral_metrics": {
-                    "eye_contact_quality": "高",
-                    "gesture_naturalness": "中",
-                    "posture_stability": "高",
+                    "deliberate_eye_contact": "なし",
+                    "illustrator_frequency": "普通",
                     "speech_fluency": "高",
-                    "filler_frequency": "少ない",
                     "response_speed": "適切",
                     "verbal_nonverbal_consistency": "一致",
+                    "immediacy_level": "高",
+                    "cognitive_load_signs": "なし",
+                    "micro_expression_detected": "なし",
+                    "dark_triad_indicators": "なし",
+                    "cwb_risk_signals": "なし",
                 },
                 "red_flags": [],
                 "positive_signals": ["テスト1"],
@@ -258,13 +261,16 @@ class TestBehavioralMetrics:
                     "professional_demeanor": {"score": 65, "observations": ["テスト2（参照: 基準）"], "confidence": "中"},
                 },
                 "behavioral_metrics": {
-                    "eye_contact_quality": "中",
-                    "gesture_naturalness": "中",
-                    "posture_stability": "中",
+                    "deliberate_eye_contact": "あり",
+                    "illustrator_frequency": "減少",
                     "speech_fluency": "高",
-                    "filler_frequency": "普通",
                     "response_speed": "適切",
                     "verbal_nonverbal_consistency": "部分一致",
+                    "immediacy_level": "中",
+                    "cognitive_load_signs": "軽度",
+                    "micro_expression_detected": "なし",
+                    "dark_triad_indicators": "なし",
+                    "cwb_risk_signals": "なし",
                 },
                 "red_flags": [],
                 "positive_signals": ["テスト2"],
@@ -286,13 +292,16 @@ class TestBehavioralMetrics:
                     "professional_demeanor": {"score": 75, "observations": ["テスト3（参照: 基準）"], "confidence": "高"},
                 },
                 "behavioral_metrics": {
-                    "eye_contact_quality": "高",
-                    "gesture_naturalness": "高",
-                    "posture_stability": "高",
+                    "deliberate_eye_contact": "なし",
+                    "illustrator_frequency": "豊富",
                     "speech_fluency": "高",
-                    "filler_frequency": "少ない",
                     "response_speed": "速い",
                     "verbal_nonverbal_consistency": "一致",
+                    "immediacy_level": "高",
+                    "cognitive_load_signs": "なし",
+                    "micro_expression_detected": "検出不能",
+                    "dark_triad_indicators": "なし",
+                    "cwb_risk_signals": "なし",
                 },
                 "red_flags": [],
                 "positive_signals": ["テスト3"],
@@ -308,12 +317,12 @@ class TestBehavioralMetrics:
         metrics = result["behavioral_metrics"]
 
         # 最頻値でマージされること
-        # eye_contact_quality: 高(2) vs 中(1) → 高
-        assert metrics["eye_contact_quality"] == "高"
+        # deliberate_eye_contact: なし(2) vs あり(1) → なし
+        assert metrics["deliberate_eye_contact"] == "なし"
         # speech_fluency: 高(3) → 高
         assert metrics["speech_fluency"] == "高"
-        # gesture_naturalness: 中(2) vs 高(1) → 中
-        assert metrics["gesture_naturalness"] == "中"
+        # immediacy_level: 高(2) vs 中(1) → 高
+        assert metrics["immediacy_level"] == "高"
 
 
 # ===== Iteration-03: 境界値・異常系テスト (T03-01) + end-to-end (T03-03) =====

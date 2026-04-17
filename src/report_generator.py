@@ -291,13 +291,16 @@ def generate_html_report(result: dict, filename: str = "", analysis_date: str = 
     metrics_html = ""
     if metrics and isinstance(metrics, dict):
         metrics_labels = {
-            "eye_contact_quality": "アイコンタクトの質",
-            "gesture_naturalness": "ジェスチャーの自然さ",
-            "posture_stability": "姿勢の安定性",
+            "deliberate_eye_contact": "意図的アイコンタクト",
+            "illustrator_frequency": "Illustrators（発話補助ジェスチャー）頻度",
             "speech_fluency": "発話の流暢さ",
-            "filler_frequency": "フィラーの頻度",
             "response_speed": "応答速度",
             "verbal_nonverbal_consistency": "言語-非言語の一致度",
+            "immediacy_level": "直接的関与度（Immediacy）",
+            "cognitive_load_signs": "認知的負荷サイン",
+            "micro_expression_detected": "微表情検出",
+            "dark_triad_indicators": "ダークトライアド兆候",
+            "cwb_risk_signals": "CWBリスク信号",
         }
         rows = ""
         for key, label in metrics_labels.items():
