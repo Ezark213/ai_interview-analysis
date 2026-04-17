@@ -121,6 +121,37 @@ class TestProjectKnowledgeBase:
         assert "レッドフラグ" in content
         assert "スコアリング" in content
 
+    def test_research_knowledge_contains_all_files(self):
+        """5本分のキーワードが結合結果に存在することを検証"""
+        from src.knowledge_loader import load_research_knowledge
+        content = load_research_knowledge()
+        # 各ファイルの代表キーワードを確認
+        assert "非言語" in content        # 01_nonverbal_risk_checklist
+        assert "認知的負荷" in content    # 02_cognitive_load_signs
+        assert "CWB" in content           # 03_cwb_risk_profile
+        assert "微表情" in content        # 04_micro_expression_guide
+        assert "スコアリング" in content  # 05_integrated_scoring_rubric
+
+    def test_research_knowledge_file_count(self):
+        """research/ディレクトリのMDファイル数が5であることを検証"""
+        research_dir = project_root / "knowledge-base" / "research"
+        md_files = list(research_dir.glob("*.md"))
+        assert len(md_files) == 5, f"Expected 5 files, got {len(md_files)}: {[f.name for f in md_files]}"
+
+    def test_research_knowledge_empty_dir_returns_empty_string(self, tmp_path):
+        """research/が空ディレクトリの場合、空文字列を返すことを検証"""
+        import importlib
+        import src.knowledge_loader as kl
+        # _PROJECT_ROOTをtmp_pathに差し替えて空research/を作成
+        (tmp_path / "knowledge-base" / "research").mkdir(parents=True)
+        original_root = kl._PROJECT_ROOT
+        kl._PROJECT_ROOT = tmp_path
+        try:
+            result = kl.load_research_knowledge()
+            assert result == "", f"Expected empty string for empty dir, got: {result!r}"
+        finally:
+            kl._PROJECT_ROOT = original_root
+
     def test_core_criteria_includes_research_supplement(self):
         """core-criteria.mdに論文ベース評価補足が含まれることを確認"""
         core_criteria = project_root / "knowledge-base" / "core-criteria.md"
